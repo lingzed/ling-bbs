@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ling.mappers.UserInfoMapper">
+    <!-- 通用字段 -->
+    <sql id="commonField">
+        user_id
+        , nick_name
+        , email
+        , password
+        , gander
+        , description
+        , join_time
+        , last_login_time
+        , last_login_ip
+        , last_login_ip_address
+        , total_integral
+        , current_integral
+        , status
+        , create_time
+        , update_time
+    </sql>
+    <!-- 通用查询sql -->
+    <sql id="commonSelect">
+        select
+        <include refid="commonField"/>
+    </sql>
+
+    <!-- 条件分页查询 -->
+    <select id="select" resultType="com.ling.entity.po.UserInfo" >
+        <include refid="commonSelect"/>
+        from user_info
+        <where>
+            <if test="nickName != null and nickName != ''">
+                nick_name like concat('%', #{nickName}, '%')
+            </if>
+            <if test="email != null and email != ''">
+                and email like concat('%', #{email}, '%')
+            </if>
+            <if test="gander != null">
+                and gander = #{gander}
+            </if>
+            <if test="startDate != null and endDate != null">
+                and join_time between #{startDate} and #{endDate}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <!-- 通过id查询 -->
+    <select id="selectById" resultType="com.ling.entity.po.UserInfo">
+        <include refid="commonSelect"/>
+        from user_info
+        <where>
+            <if test="userId != null">
+                user_id = #{userId}
+            </if>
+        </where>
+    </select>
+
+    <!-- 插入 -->
+    <insert id="insert" parameterType="com.ling.entity.po.UserInfo">
+        insert into user_info(<include refid="commonField"/>) values(
+        #{userId},
+        #{nickName},
+        #{email},
+        #{password},
+        #{gander},
+        #{description},
+        #{joinTime},
+        #{lastLoginTime},
+        #{lastLoginIp},
+        #{lastLoginIpAddress},
+        #{totalIntegral},
+        #{currentIntegral},
+        #{status},
+        #{createTime},
+        #{updateTime})
+    </insert>
+
+    <!-- 批量插入 -->
+    <insert id="batchInsert">
+        insert into user_info(<include refid="commonField"/>) values
+        <foreach collection="userInfos" item="userInfo" separator=",">
+            (#{userInfo.userId},
+            #{userInfo.nickName},
+            #{userInfo.email},
+            #{userInfo.password},
+            #{userInfo.gander},
+            #{userInfo.description},
+            #{userInfo.joinTime},
+            #{userInfo.lastLoginTime},
+            #{userInfo.lastLoginIp},
+            #{userInfo.lastLoginIpAddress},
+            #{userInfo.totalIntegral},
+            #{userInfo.currentIntegral},
+            #{userInfo.status},
+            #{userInfo.createTime},
+            #{userInfo.updateTime})
+        </foreach>
+    </insert>
+
+    <!-- 更新 -->
+    <update id="update">
+        update user_info
+        <set>
+            <if test="nickName != null and nickName != ''">nick_name = #{nickName},</if>
+            <if test="email != null and email != ''">email = #{email},</if>
+            <if test="password != null and password != ''">password = #{password},</if>
+            <if test="gander != null">gander = #{gander},</if>
+            <if test="description != null and description != ''">description = #{description},</if>
+            <if test="joinTime != null">join_time = #{joinTime},</if>
+            <if test="lastLoginTime != null">last_login_time = #{lastLoginTime},</if>
+            <if test="lastLoginIp != null and lastLoginIp != ''">last_login_ip = #{lastLoginIp},</if>
+            <if test="lastLoginIpAddress != null and lastLoginIpAddress != ''">last_login_ip_address = #{lastLoginIpAddress},</if>
+            <if test="totalIntegral != null">total_integral = #{totalIntegral},</if>
+            <if test="currentIntegral != null">current_integral = #{currentIntegral},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </set>
+        <where>
+            <if test="userId != null and userId != ''">
+                user_id = #{userId}
+            </if>
+        </where>
+    </update>
+
+    <!-- 批量更新，需要设置jdbc的url参数allowMultiQueries=true -->
+    <update id="batchUpdate">
+        <foreach collection="userInfos" item="userInfo" separator=";">
+            update user_info
+            <set>
+                <if test="nickName != null and nickName != ''">nick_name = #{userInfo.nickName},</if>
+                <if test="email != null and email != ''">email = #{userInfo.email},</if>
+                <if test="password != null and password != ''">password = #{userInfo.password},</if>
+                <if test="gander != null">gander = #{userInfo.gander},</if>
+                <if test="description != null and description != ''">description = #{userInfo.description},</if>
+                <if test="joinTime != null">join_time = #{userInfo.joinTime},</if>
+                <if test="lastLoginTime != null">last_login_time = #{userInfo.lastLoginTime},</if>
+                <if test="lastLoginIp != null and lastLoginIp != ''">last_login_ip = #{userInfo.lastLoginIp},</if>
+                <if test="lastLoginIpAddress != null and lastLoginIpAddress != ''">last_login_ip_address = #{userInfo.lastLoginIpAddress},</if>
+                <if test="totalIntegral != null">total_integral = #{userInfo.totalIntegral},</if>
+                <if test="currentIntegral != null">current_integral = #{userInfo.currentIntegral},</if>
+                <if test="status != null">status = #{userInfo.status},</if>
+                <if test="createTime != null">create_time = #{userInfo.createTime},</if>
+                <if test="updateTime != null">update_time = #{userInfo.updateTime},</if>
+            </set>
+            <where>
+                <if test="userId != null and userId != ''">
+                    user_id = #{userInfo.userId}
+                </if>
+            </where>
+        </foreach>
+    </update>
+
+    <!-- 删除/批量删除 -->
+    <delete id="delete">
+        delete from user_info where user_id in
+        <foreach collection="ids" item="userId" separator="," open="(" close=")">
+            <if test="userId != null and userId != ''">
+                #{userId}
+            </if>
+        </foreach>
+    </delete>
+</mapper>
