@@ -59,7 +59,7 @@ log:
 
 # 项目路径配置
 project:
-  folder: E:/ling-bbs-folder/web   # 项目文件路径
+  folder: D:/ling-bbs-folder/web   # 项目文件路径
 
 # 开发环境标识
 isDev: true
