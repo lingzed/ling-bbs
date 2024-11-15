@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ling.mappers.MailCodeMapper">
+    <!-- 通用字段 -->
+    <sql id="commonField">
+        mail, code, create_time, status, update_time
+    </sql>
+    <!-- 通用查询sql -->
+    <sql id="commonSelect">
+        select
+        <include refid="commonField"/>
+    </sql>
+
+    <!-- 条件分页查询 -->
+    <select id="select" resultType="com.ling.entity.po.MailCode" >
+        <include refid="commonSelect"/>
+        from mail_code
+        <where>
+            <if test="mail != null and mail != ''">
+                mail like concat('%', #{mail}, '%')
+            </if>
+            <if test="code != null and code != ''">
+                and code like concat('%', #{code}, '%')
+            </if>
+            <if test="startDate != null and endDate != null">
+                and create_time between #{startDate} and #{endDate}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+        </where>
+    </select>
+
+    <!-- 通过mail和code查询 -->
+    <select id="selectByMailAndCode" resultType="com.ling.entity.po.MailCode">
+        <include refid="commonSelect"/>
+        from mail_code
+        <where>
+            <if test="mail != null and mail != ''">
+                mail = #{mail}
+            </if>
+            <if test="code != null and code != ''">
+                and code = #{code}
+            </if>
+        </where>
+    </select>
+
+    <!-- 插入 -->
+    <insert id="insert" parameterType="com.ling.entity.po.MailCode">
+        insert into mail_code(<include refid="commonField"/>) values(
+        #{mail},
+        #{code},
+        #{createTime},
+        #{status},
+        #{updateTime})
+    </insert>
+
+    <!-- 批量插入 -->
+    <insert id="batchInsert">
+        insert into mail_code(<include refid="commonField"/>) values
+        <foreach collection="mailCodes" item="mailCode" separator=",">
+            (#{mailCode.mail},
+            #{mailCode.code},
+            #{mailCode.createTime},
+            #{mailCode.status},
+            #{mailCode.updateTime})
+        </foreach>
+    </insert>
+
+    <!-- 更新 -->
+    <update id="update">
+        update mail_code
+        <set>
+            <if test="mail != null and mail != ''">mail = #{mail},</if>
+            <if test="code != null and code != ''">code = #{code},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </set>
+        <where>
+            <if test="mail != null and mail != ''">
+                mail = #{mail}
+            </if>
+            <if test="code != null and code != ''">
+                and code = #{code}
+            </if>
+        </where>
+    </update>
+
+    <!-- 更新 -->
+    <update id="updateStatusByMail">
+        update mail_code
+        <set>
+            status = 1
+        </set>
+        <where>
+            <if test="mail != null and mail != ''">
+                mail = #{mail}
+            </if>
+        </where>
+    </update>
+
+    <!-- 批量更新，需要设置jdbc的url参数allowMultiQueries=true -->
+    <update id="batchUpdate">
+        <foreach collection="mailCodes" item="mailCode" separator=";">
+            update mail_code
+            <set>
+                <if test="mailCode.mail != null and mailCode.mail != ''">
+                    mail = #{mailCode.mail},
+                </if>
+                <if test="mailCode.code != null and mailCode.code != ''">
+                    code = #{mailCode.code},
+                </if>
+                <if test="mailCode.createTime != null">
+                    create_time = #{mailCode.createTime},
+                </if>
+                <if test="mailCode.status != null">
+                    status = #{mailCode.status},
+                </if>
+                <if test="mailCode.updateTime != null">
+                    update_time = #{mailCode.updateTime},
+                </if>
+            </set>
+            <where>
+                <if test="mailCode.mail != null and mailCode.mail != ''">
+                    mail = #{mailCode.mail}
+                </if>
+                <if test="mailCode.code != null and mailCode.code != ''">
+                    and code = #{mailCode.code}
+                </if>
+            </where>
+        </foreach>
+    </update>
+
+    <!-- 删除/批量删除 -->
+    <delete id="delete">
+        delete
+        from mail_code
+        where mail = #{mail}
+          and code = #{code}
+    </delete>
+</mapper>

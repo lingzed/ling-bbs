@@ -26,6 +26,13 @@ public interface UserInfoMapper {
     UserInfo selectById(String id);
 
     /**
+     * 根据邮箱查询
+     * @param email
+     * @return
+     */
+    UserInfo selectByEmail(String email);
+
+    /**
      * 添加
      *
      * @param userInfo

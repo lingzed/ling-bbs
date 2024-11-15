@@ -55,8 +55,18 @@
         <include refid="commonSelect"/>
         from user_info
         <where>
-            <if test="userId != null">
+            <if test="userId != null and userId != ''">
                 user_id = #{userId}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectByEmail" resultType="com.ling.entity.po.UserInfo">
+        <include refid="commonSelect"/>
+        from user_info
+        <where>
+            <if test="email != null and email != ''">
+                email = #{email}
             </if>
         </where>
     </select>
@@ -134,23 +144,51 @@
         <foreach collection="userInfos" item="userInfo" separator=";">
             update user_info
             <set>
-                <if test="nickName != null and nickName != ''">nick_name = #{userInfo.nickName},</if>
-                <if test="email != null and email != ''">email = #{userInfo.email},</if>
-                <if test="password != null and password != ''">password = #{userInfo.password},</if>
-                <if test="gander != null">gander = #{userInfo.gander},</if>
-                <if test="description != null and description != ''">description = #{userInfo.description},</if>
-                <if test="joinTime != null">join_time = #{userInfo.joinTime},</if>
-                <if test="lastLoginTime != null">last_login_time = #{userInfo.lastLoginTime},</if>
-                <if test="lastLoginIp != null and lastLoginIp != ''">last_login_ip = #{userInfo.lastLoginIp},</if>
-                <if test="lastLoginIpAddress != null and lastLoginIpAddress != ''">last_login_ip_address = #{userInfo.lastLoginIpAddress},</if>
-                <if test="totalIntegral != null">total_integral = #{userInfo.totalIntegral},</if>
-                <if test="currentIntegral != null">current_integral = #{userInfo.currentIntegral},</if>
-                <if test="status != null">status = #{userInfo.status},</if>
-                <if test="createTime != null">create_time = #{userInfo.createTime},</if>
-                <if test="updateTime != null">update_time = #{userInfo.updateTime},</if>
+                <if test="userInfo.nickName != null and userInfo.nickName != ''">
+                    nick_name = #{userInfo.nickName},
+                </if>
+                <if test="userInfo.email != null and userInfo.email != ''">
+                    email = #{userInfo.email},
+                </if>
+                <if test="userInfo.password != null and userInfo.password != ''">
+                    password = #{userInfo.password},
+                </if>
+                <if test="userInfo.gander != null">
+                    gander = #{userInfo.gander},
+                </if>
+                <if test="userInfo.description != null and userInfo.description != ''">
+                    description = #{userInfo.description},
+                </if>
+                <if test="userInfo.joinTime != null">
+                    join_time = #{userInfo.joinTime},
+                </if>
+                <if test="userInfo.lastLoginTime != null">
+                    last_login_time = #{userInfo.lastLoginTime},
+                </if>
+                <if test="userInfo.lastLoginIp != null and userInfo.lastLoginIp != ''">
+                    last_login_ip = #{userInfo.lastLoginIp},
+                </if>
+                <if test="userInfo.lastLoginIpAddress != null and userInfo.lastLoginIpAddress != ''">
+                    last_login_ip_address = #{userInfo.lastLoginIpAddress},
+                </if>
+                <if test="userInfo.totalIntegral != null">
+                    total_integral = #{userInfo.totalIntegral},
+                </if>
+                <if test="userInfo.currentIntegral != null">
+                    current_integral = #{userInfo.currentIntegral},
+                </if>
+                <if test="userInfo.status != null">
+                    status = #{userInfo.status},
+                </if>
+                <if test="userInfo.createTime != null">
+                    create_time = #{userInfo.createTime},
+                </if>
+                <if test="userInfo.updateTime != null">
+                    update_time = #{userInfo.updateTime},
+                </if>
             </set>
             <where>
-                <if test="userId != null and userId != ''">
+                <if test="userInfo.userId != null and userInfo.userId != ''">
                     user_id = #{userInfo.userId}
                 </if>
             </where>

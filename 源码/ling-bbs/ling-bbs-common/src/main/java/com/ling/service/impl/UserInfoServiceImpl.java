@@ -85,7 +85,6 @@ public class UserInfoServiceImpl implements UserInfoService {
         try {
             Date date = new Date();
             List<UserInfo> newUserInfos = UserInfos.stream().map(u -> {
-                u.setCreateTime(date);
                 u.setUpdateTime(date);
                 return u;
             }).collect(Collectors.toList());

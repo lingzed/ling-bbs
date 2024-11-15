@@ -38,8 +38,8 @@ spring:
           socketFactory:
             class: javax.net.ssl.SSLSocketFactory   # 使用 SSL 连接
         debug: true                                 # 开启调试模式，查看邮件发送的详细日志
-    username: test@qq.com
-    password: 123                                   # 使用邮箱官网申请的授权码
+    username: 2929441868@qq.com
+    password: ogtefszgsvrbdehb                      # 使用邮箱官网申请的授权码
 
 # mybatis 配置
 mybatis:
@@ -59,7 +59,7 @@ log:
 
 # 项目路径配置
 project:
-  folder: D:/ling-bbs-folder/web   # 项目文件路径
+  folder: E:/ling-bbs-folder/web   # 项目文件路径
 
 # 开发环境标识
 isDev: true

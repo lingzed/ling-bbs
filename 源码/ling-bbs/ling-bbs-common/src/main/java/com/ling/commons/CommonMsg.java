@@ -5,6 +5,7 @@ public class CommonMsg {
     public static final String REQUEST_NOT_FOUND = "请求地址不存在";
     public static final String REQUEST_PARAM_ERROR = "请求参数错误";
     public static final String REQUEST_ALREADY_EXISTS = "信息已存在";
+    public static final String MAIL_EXISTS = "邮箱已存在";
     public static final String BUSINESS_ERROR = "业务异常";
     public static final String SERVER_ERROR = "服务器返回错误，请联系管理员";
     public static final String INVALID_TOKEN = "无效的token";
@@ -22,4 +23,7 @@ public class CommonMsg {
     public static final String DELETE_FAIL = "删除失败";
     public static final String QUERY_SUCCESS = "查询成功";
     public static final String QUERY_FAIL = "查询失败";
+    public static final String CHECK_CODE_ERROR = "图片验证码错误";
+    public static final String MAIL_CHECK_CODE_ERROR = "邮箱验证码错误";
+    public static final String MAIL_SEND_FAIL = "邮件发送失败";
 }
