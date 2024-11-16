@@ -58,4 +58,15 @@ public interface UserInfoService {
      * @param ids
      */
     void delete(List<String> ids);
+
+    /**
+     * 注册
+     *
+     * @param nickname
+     * @param password
+     * @param mail
+     * @param checkCode
+     * @param sCheckCode
+     */
+    void register(String nickname, String password, String mail, String checkCode, String sCheckCode);
 }

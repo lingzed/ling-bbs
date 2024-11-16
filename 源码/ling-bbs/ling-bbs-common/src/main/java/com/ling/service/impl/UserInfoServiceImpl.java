@@ -102,4 +102,12 @@ public class UserInfoServiceImpl implements UserInfoService {
             throw new BusinessException(CommonMsg.DELETE_FAIL, e);
         }
     }
+
+    @Override
+    public void register(String nickname, String password, String mail, String checkCode, String sCheckCode) {
+        if (checkCode == null || sCheckCode == null || !checkCode.equalsIgnoreCase(sCheckCode)) {
+            throw new BusinessException(CommonMsg.CHECK_CODE_ERROR);
+        }
+//        if ()
+    }
 }

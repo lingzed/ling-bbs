@@ -2,7 +2,6 @@ package com.ling.service.impl;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.util.StringUtil;
 import com.ling.commons.CommonMsg;
 import com.ling.config.WebConfig;
 import com.ling.entity.constant.Constant;
@@ -13,6 +12,7 @@ import com.ling.exception.BusinessException;
 import com.ling.mappers.MailCodeMapper;
 import com.ling.mappers.UserInfoMapper;
 import com.ling.service.MailCodeService;
+import com.ling.utils.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -133,38 +133,32 @@ public class MailCodeServiceImpl implements MailCodeService {
     @Override
     @Transactional
     public void sendMailCode(String mail, String checkCode, String mailCheckCode) {
-        try {
-            UserInfo userInfo = userInfoMapper.selectByEmail(mail);
-            // 判断邮箱是否已存在
-            if (userInfo != null) {
-                throw new BusinessException(CommonMsg.MAIL_EXISTS);
-            }
-            // 判断验证码是否正确
-            if (checkCode == null || mailCheckCode == null || !mailCheckCode.equalsIgnoreCase(checkCode)) {
-                throw new BusinessException(CommonMsg.CHECK_CODE_ERROR);
-            }
-
-            // 先将这个mail的status改为失效
-            mailCodeMapper.updateStatusByMail(mail);
-
-            // 生成随机code
-            String mCode = null;
-            send(mail, mCode);
-
-            // 在将这个邮箱验证码数据插入mail_code表
-            MailCode mailCode = new MailCode();
-            mailCode.setMail(mail);
-            mailCode.setCode(mCode);
-            Date date = new Date();
-            mailCode.setCreateTime(date);
-            mailCode.setUpdateTime(date);
-            mailCode.setStatus(Constant.NUM_0);
-            mailCodeMapper.insert(mailCode);
-        } catch (Exception e) {
-            log.error("邮件发送失败");
-            throw new BusinessException(CommonMsg.MAIL_SEND_FAIL, e);
+        UserInfo userInfo = userInfoMapper.selectByEmail(mail);
+        // 判断邮箱是否已存在
+        if (userInfo != null) {
+            throw new BusinessException(CommonMsg.MAIL_EXISTS);
+        }
+        // 判断验证码是否正确
+        if (checkCode.isBlank() || mailCheckCode.isBlank() || !mailCheckCode.equalsIgnoreCase(checkCode)) {
+            throw new BusinessException(CommonMsg.CHECK_CODE_ERROR);
         }
 
+        // 先将这个mail的status改为失效
+        mailCodeMapper.updateStatusByMail(mail);
+
+        // 生成随机code
+        String mCode = StringUtil.getRandomStr(Constant.NUM_5);
+        send(mail, mCode);
+
+        // 在将这个邮箱验证码数据插入mail_code表
+        MailCode mailCode = new MailCode();
+        mailCode.setMail(mail);
+        mailCode.setCode(mCode);
+        Date date = new Date();
+        mailCode.setCreateTime(date);
+        mailCode.setUpdateTime(date);
+        mailCode.setStatus(Constant.NUM_0);
+        mailCodeMapper.insert(mailCode);
     }
 
     /**
@@ -184,7 +178,7 @@ public class MailCodeServiceImpl implements MailCodeService {
             mimeMessageHelper.setSentDate(new Date());              // 设置发送时间
             javaMailSender.send(mimeMessage);
         } catch (MessagingException e) {
-            throw new RuntimeException(e);
+            throw new BusinessException(CommonMsg.MAIL_SEND_FAIL, e);
         }
     }
 }
