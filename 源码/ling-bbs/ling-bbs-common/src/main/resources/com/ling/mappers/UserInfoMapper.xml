@@ -71,6 +71,16 @@
         </where>
     </select>
 
+    <select id="selectByNickname" resultType="com.ling.entity.po.UserInfo">
+        <include refid="commonSelect"/>
+        from user_info
+        <where>
+            <if test="nickname != null and nickname != ''">
+                nick_name = #{nickname}
+            </if>
+        </where>
+    </select>
+
     <!-- 插入 -->
     <insert id="insert" parameterType="com.ling.entity.po.UserInfo">
         insert into user_info(<include refid="commonField"/>) values(

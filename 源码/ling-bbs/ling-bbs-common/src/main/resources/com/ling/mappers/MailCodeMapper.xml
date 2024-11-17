@@ -38,12 +38,14 @@
         <include refid="commonSelect"/>
         from mail_code
         <where>
+            status = 0
             <if test="mail != null and mail != ''">
-                mail = #{mail}
+                and mail = #{mail}
             </if>
             <if test="code != null and code != ''">
                 and code = #{code}
             </if>
+
         </where>
     </select>
 

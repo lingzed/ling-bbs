@@ -4,16 +4,16 @@ import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
 import com.ling.commons.CommonMsg;
 import com.ling.config.WebConfig;
-import com.ling.entity.constant.Constant;
+import com.ling.constant.Constant;
 import com.ling.entity.po.MailCode;
 import com.ling.entity.po.UserInfo;
 import com.ling.entity.vo.PageBean;
+import com.ling.enums.MailCodeStatusEnum;
 import com.ling.exception.BusinessException;
 import com.ling.mappers.MailCodeMapper;
 import com.ling.mappers.UserInfoMapper;
 import com.ling.service.MailCodeService;
 import com.ling.utils.StringUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -129,20 +129,25 @@ public class MailCodeServiceImpl implements MailCodeService {
         }
     }
 
-
+    /**
+     * 发送邮件的业务
+     *
+     * @param mail
+     * @param checkCode     用户输入的验证码
+     * @param mailCheckCode 生成的图片验证码
+     */
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void sendMailCode(String mail, String checkCode, String mailCheckCode) {
+        // 判断验证码是否正确
+        if (!mailCheckCode.equalsIgnoreCase(checkCode)) {
+            throw new BusinessException(CommonMsg.CHECK_CODE_ERROR);
+        }
         UserInfo userInfo = userInfoMapper.selectByEmail(mail);
         // 判断邮箱是否已存在
         if (userInfo != null) {
             throw new BusinessException(CommonMsg.MAIL_EXISTS);
         }
-        // 判断验证码是否正确
-        if (checkCode.isBlank() || mailCheckCode.isBlank() || !mailCheckCode.equalsIgnoreCase(checkCode)) {
-            throw new BusinessException(CommonMsg.CHECK_CODE_ERROR);
-        }
-
         // 先将这个mail的status改为失效
         mailCodeMapper.updateStatusByMail(mail);
 
@@ -150,14 +155,15 @@ public class MailCodeServiceImpl implements MailCodeService {
         String mCode = StringUtil.getRandomStr(Constant.NUM_5);
         send(mail, mCode);
 
-        // 在将这个邮箱验证码数据插入mail_code表
+        // 再将这个邮箱验证码数据插入mail_code表
         MailCode mailCode = new MailCode();
         mailCode.setMail(mail);
         mailCode.setCode(mCode);
         Date date = new Date();
         mailCode.setCreateTime(date);
         mailCode.setUpdateTime(date);
-        mailCode.setStatus(Constant.NUM_0);
+        mailCode.setStatus(MailCodeStatusEnum.NOT_USE.getStatus());
+
         mailCodeMapper.insert(mailCode);
     }
 

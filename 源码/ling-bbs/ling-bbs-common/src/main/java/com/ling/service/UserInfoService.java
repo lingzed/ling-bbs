@@ -4,6 +4,7 @@ import com.ling.entity.po.UserInfo;
 import com.ling.entity.vo.PageBean;
 import org.apache.ibatis.annotations.Param;
 
+import javax.servlet.http.HttpSession;
 import java.util.List;
 
 public interface UserInfoService {
@@ -23,6 +24,22 @@ public interface UserInfoService {
      * @return
      */
     UserInfo findById(String id);
+
+    /**
+     * 根据邮箱查询
+     *
+     * @param email
+     * @return
+     */
+    UserInfo findByEmail(String email);
+
+    /**
+     * 根据昵称查询
+     *
+     * @param nickname
+     * @return
+     */
+    UserInfo findByNickname(String nickname);
 
     /**
      * 添加
@@ -67,6 +84,7 @@ public interface UserInfoService {
      * @param mail
      * @param checkCode
      * @param sCheckCode
+     * @param mailCode
      */
-    void register(String nickname, String password, String mail, String checkCode, String sCheckCode);
+    void register(String nickname, String password, String mail, String checkCode, String sCheckCode, String mailCode);
 }

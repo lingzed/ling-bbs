@@ -27,10 +27,19 @@ public interface UserInfoMapper {
 
     /**
      * 根据邮箱查询
+     *
      * @param email
      * @return
      */
     UserInfo selectByEmail(String email);
+
+    /**
+     * 根据昵称查询
+     *
+     * @param nickname
+     * @return
+     */
+    UserInfo selectByNickname(String nickname);
 
     /**
      * 添加
