@@ -24,6 +24,8 @@ public class CommonMsg {
     public static final String QUERY_SUCCESS = "查询成功";
     public static final String QUERY_FAIL = "查询失败";
     public static final String CHECK_CODE_ERROR = "图片验证码错误";
+    public static final String CHECK_CODE_EXPIRED = "图片验证码已过期";
     public static final String MAIL_CHECK_CODE_ERROR = "邮箱验证码错误";
+    public static final String MAIL_CHECK_CODE_EXPIRED = "邮箱验证码已过期";
     public static final String MAIL_SEND_FAIL = "邮件发送失败";
 }

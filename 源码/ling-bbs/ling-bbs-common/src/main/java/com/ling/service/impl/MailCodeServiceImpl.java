@@ -183,7 +183,7 @@ public class MailCodeServiceImpl implements MailCodeService {
             mimeMessageHelper.setText("您的验证码是: " + mCode);      // 设置内容
             mimeMessageHelper.setSentDate(new Date());              // 设置发送时间
             javaMailSender.send(mimeMessage);
-        } catch (MessagingException e) {
+        } catch (Exception e) {
             throw new BusinessException(CommonMsg.MAIL_SEND_FAIL, e);
         }
     }

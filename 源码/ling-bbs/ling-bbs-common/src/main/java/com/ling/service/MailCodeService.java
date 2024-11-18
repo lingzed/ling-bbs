@@ -39,7 +39,7 @@ public interface MailCodeService {
      *
      * @param mailCodes
      */
-    void batchAdd(@Param("userInfos") List<MailCode> mailCodes);
+    void batchAdd(List<MailCode> mailCodes);
 
     /**
      * 更新
@@ -53,7 +53,7 @@ public interface MailCodeService {
      *
      * @param mailCodes
      */
-    void batchEdit(@Param("userInfos") List<MailCode> mailCodes);
+    void batchEdit(List<MailCode> mailCodes);
 
     /**
      * 根据mail和code删除

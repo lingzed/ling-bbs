@@ -2,9 +2,7 @@ package com.ling.service;
 
 import com.ling.entity.po.UserInfo;
 import com.ling.entity.vo.PageBean;
-import org.apache.ibatis.annotations.Param;
 
-import javax.servlet.http.HttpSession;
 import java.util.List;
 
 public interface UserInfoService {
@@ -53,7 +51,7 @@ public interface UserInfoService {
      *
      * @param userInfos
      */
-    void batchAdd(@Param("userInfos") List<UserInfo> userInfos);
+    void batchAdd(List<UserInfo> userInfos);
 
     /**
      * 更新
@@ -67,7 +65,7 @@ public interface UserInfoService {
      *
      * @param userInfos
      */
-    void batchEdit(@Param("userInfos") List<UserInfo> userInfos);
+    void batchEdit(List<UserInfo> userInfos);
 
     /**
      * 删除/批量删除

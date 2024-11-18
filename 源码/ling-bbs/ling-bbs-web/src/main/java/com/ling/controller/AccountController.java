@@ -1,5 +1,6 @@
 package com.ling.controller;
 
+import com.ling.commons.CommonMsg;
 import com.ling.entity.ImageCode;
 import com.ling.constant.Constant;
 import com.ling.entity.po.UserInfo;
@@ -72,6 +73,9 @@ public class AccountController {
             }
             // 从session中获取邮箱的图片验证码
             String mailCheckCode = (String) session.getAttribute(Constant.CHECK_CODE_EMAIL);
+            if (StringUtil.isEmpty(mailCheckCode)) {
+                throw new BusinessException(CommonMsg.MAIL_CHECK_CODE_EXPIRED);
+            }
             log.info("生成的邮箱图片验证码: {}", mailCheckCode);
             mailCodeService.sendMailCode(mail, checkCode, mailCheckCode);
             return Result.success();
@@ -100,6 +104,9 @@ public class AccountController {
                 throw new BusinessException(ResponseCodeEnum.CODE_600);
             }
             String sCheckCode = (String) session.getAttribute(Constant.CHECK_CODE);
+            if (StringUtil.isEmpty(sCheckCode)) {
+                throw new BusinessException(CommonMsg.CHECK_CODE_EXPIRED);
+            }
             log.info("生成的图片验证码: {}", sCheckCode);
             userInfoService.register(nickname, password, mail, checkCode, sCheckCode, mailCode);
             return Result.success();

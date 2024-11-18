@@ -8,6 +8,6 @@ public class Constant {
     public static final Integer NUM_5 = 5;
     public static final Integer NUM_10 = 10;
     public static final Integer NUM_15 = 15;
-    public static final long MIN_15_TO_MILLIS = 15 * 60 * 1000L;
-    public static final long MIN_5_TO_MILLIS = 5 * 60 * 1000L;
+    public static final long MIN_15_TO_MILLIS = 900000L;
+    public static final long MIN_5_TO_MILLIS = 300000L;
 }
