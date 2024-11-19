@@ -15,6 +15,7 @@ import com.ling.mappers.UserInfoMapper;
 import com.ling.service.MailCodeService;
 import com.ling.service.UserInfoService;
 import com.ling.utils.StringUtil;
+import com.ling.utils.SysCacheUtil;
 import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -164,7 +165,8 @@ public class UserInfoServiceImpl implements UserInfoService {
         userInfo.setPassword(StringUtil.encodeMD5(password));
         Date date = new Date();
         userInfo.setJoinTime(date);
-        // 设置积分 TODO
+        userInfo.setTotalIntegral(Constant.NUM_0);      // 初始积分为0，后续从系统设置中更新
+        userInfo.setCurrentIntegral(Constant.NUM_0);
         userInfo.setStatus(UserStatusEnum.ENABLE.getStatus());
         userInfo.setCreateTime(date);
         userInfo.setUpdateTime(date);

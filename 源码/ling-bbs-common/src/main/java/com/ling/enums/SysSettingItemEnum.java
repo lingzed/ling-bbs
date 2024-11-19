@@ -4,12 +4,12 @@ package com.ling.enums;
  * 设置项枚举
  */
 public enum SysSettingItemEnum {
-    AUDIT("audit", "com.ling.entity.dto.SysSetting4Audit.java", "sysSetting4Audit"),
-    COMMENT("comment", "com.ling.entity.dto.SysSetting4Comment.java", "sysSetting4Comment"),
-    LIKE("like", "com.ling.entity.dto.SysSetting4Like.java", "sysSetting4Like"),
-    MAIL("mail", "com.ling.entity.dto.SysSetting4Mail.java", "sysSetting4Mail"),
-    POST("post", "com.ling.entity.dto.SysSetting4Post.java", "sysSetting4Post"),
-    REGISTER("register", "com.ling.entity.dto.SysSetting4Register.java", "sysSetting4Register");
+    AUDIT("audit", "com.ling.entity.dto.SysSetting4Audit", "sysSetting4Audit"),
+    COMMENT("comment", "com.ling.entity.dto.SysSetting4Comment", "sysSetting4Comment"),
+    LIKE("like", "com.ling.entity.dto.SysSetting4Like", "sysSetting4Like"),
+    MAIL("mail", "com.ling.entity.dto.SysSetting4Mail", "sysSetting4Mail"),
+    POST("post", "com.ling.entity.dto.SysSetting4Post", "sysSetting4Post"),
+    REGISTER("register", "com.ling.entity.dto.SysSetting4Register", "sysSetting4Register");
 
     private String code;        // 设置项编码
     private String classname;   // 设置项类全类名

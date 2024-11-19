@@ -4,32 +4,33 @@ package com.ling.entity.dto;
  * 系统设置-邮件设置
  */
 public class SysSetting4Mail {
-    private String mailTile;    // 邮箱验证码的标题
+    private String mailTitle;    // 邮箱验证码的标题
     private String mailContent; // 邮箱验证码的内容模板
 
 
     public SysSetting4Mail() {
     }
 
-    public SysSetting4Mail(String mailTile, String mailContent) {
-        this.mailTile = mailTile;
+    public SysSetting4Mail(String mailTitle, String mailContent) {
+        this.mailTitle = mailTitle;
         this.mailContent = mailContent;
     }
 
+
     /**
      * 获取
-     * @return mailTile
+     * @return mailTitle
      */
-    public String getMailTile() {
-        return mailTile;
+    public String getMailTitle() {
+        return mailTitle;
     }
 
     /**
      * 设置
-     * @param mailTile
+     * @param mailTitle
      */
-    public void setMailTile(String mailTile) {
-        this.mailTile = mailTile;
+    public void setMailTitle(String mailTitle) {
+        this.mailTitle = mailTitle;
     }
 
     /**
@@ -49,6 +50,6 @@ public class SysSetting4Mail {
     }
 
     public String toString() {
-        return "SysSetting4Mail{mailTile = " + mailTile + ", mailContent = " + mailContent + "}";
+        return "SysSetting4Mail{mailTitle = " + mailTitle + ", mailContent = " + mailContent + "}";
     }
 }

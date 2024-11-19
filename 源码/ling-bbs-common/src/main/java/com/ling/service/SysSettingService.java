@@ -16,6 +16,13 @@ public interface SysSettingService {
     PageBean<SysSetting> find(SysSetting sysSetting);
 
     /**
+     * 查询所有系统设置信息
+     *
+     * @return
+     */
+    List<SysSetting> findAll();
+
+    /**
      * 根据编码查询系统设置信息
      *
      * @param code 编码
@@ -57,4 +64,9 @@ public interface SysSettingService {
      * @param codes 编码列表
      */
     void delete(List<String> codes);
+
+    /**
+     * 刷新系统设置信息的缓存
+     */
+    void refreshCache();
 }
