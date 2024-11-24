@@ -13,7 +13,7 @@ public class SysCacheUtil {
     private static final Map<String, SysSettingContainer> sysCache = new ConcurrentHashMap<>(); // 系统设置缓存
 
     /**
-     * 获取系统设置缓存
+     * 获取系统设置的缓存
      *
      * @return
      */
@@ -22,7 +22,7 @@ public class SysCacheUtil {
     }
 
     /**
-     * 设置系统设置缓存
+     * 设置系统设置的缓存
      *
      * @param sysSettingContainer
      */

@@ -6,17 +6,18 @@ import com.ling.commons.CommonMsg;
 import com.ling.constant.Constant;
 import com.ling.entity.po.MailCode;
 import com.ling.entity.po.UserInfo;
+import com.ling.entity.po.UserMessage;
 import com.ling.entity.vo.PageBean;
-import com.ling.enums.MailCodeStatusEnum;
+import com.ling.enums.MessageStatus;
+import com.ling.enums.MessageTypeEnum;
 import com.ling.enums.UserStatusEnum;
 import com.ling.exception.BusinessException;
 import com.ling.mappers.MailCodeMapper;
 import com.ling.mappers.UserInfoMapper;
-import com.ling.service.MailCodeService;
+import com.ling.mappers.UserMessageMapper;
 import com.ling.service.UserInfoService;
 import com.ling.utils.StringUtil;
 import com.ling.utils.SysCacheUtil;
-import org.apache.catalina.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +33,8 @@ public class UserInfoServiceImpl implements UserInfoService {
     private UserInfoMapper userInfoMapper;
     @Autowired
     private MailCodeMapper mailCodeMapper;
+    @Resource
+    private UserMessageMapper userMessageMapper;
 
     @Override
     public PageBean<UserInfo> find(UserInfo userInfo) {
@@ -159,7 +162,8 @@ public class UserInfoServiceImpl implements UserInfoService {
         }
         // 创建并插入用户信息
         UserInfo userInfo = new UserInfo();
-        userInfo.setUserId(StringUtil.getRandomNum(Constant.NUM_10));
+        String uid = StringUtil.getRandomNum(Constant.NUM_10);
+        userInfo.setUserId(uid);
         userInfo.setNickName(nickname);
         userInfo.setEmail(mail);
         userInfo.setPassword(StringUtil.encodeMD5(password));
@@ -173,5 +177,16 @@ public class UserInfoServiceImpl implements UserInfoService {
         userInfoMapper.insert(userInfo);
         // 将邮箱验证码置为无效
         mailCodeMapper.updateStatusByMail(mail);
+
+        // 注册成功，向用户发送消息欢迎消息，消息内容从系统设置中获取
+        UserMessage userMessage = new UserMessage();
+        userMessage.setReceivedUserId(uid);     // 接收者，即新用户
+        userMessage.setMessageType(MessageTypeEnum.SYS_MESSAGE.getCode());   // 消息类型：系统消息
+        String welcomeInfo = SysCacheUtil.getSysSettingContainer().getSysSetting4Register().getWelcomeInfo(); // 消息内容：从系统设置中获取
+        userMessage.setMessageContent(welcomeInfo);
+        userMessage.setStatus(MessageStatus.NO_READ.getCode());      // 状态：未读
+        userMessage.setCreateTime(date);
+        userMessage.setUpdateTime(date);
+        userMessageMapper.insert(userMessage);
     }
 }
