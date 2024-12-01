@@ -7,17 +7,22 @@ import com.ling.constant.Constant;
 import com.ling.entity.po.MailCode;
 import com.ling.entity.po.UserInfo;
 import com.ling.entity.po.UserMessage;
+import com.ling.entity.po.UserPointsRecode;
 import com.ling.entity.vo.PageBean;
-import com.ling.enums.MessageStatus;
+import com.ling.enums.MessageStatusEnum;
 import com.ling.enums.MessageTypeEnum;
+import com.ling.enums.OperationTypeEnum;
 import com.ling.enums.UserStatusEnum;
 import com.ling.exception.BusinessException;
 import com.ling.mappers.MailCodeMapper;
 import com.ling.mappers.UserInfoMapper;
 import com.ling.mappers.UserMessageMapper;
+import com.ling.mappers.UserPointsRecodeMapper;
 import com.ling.service.UserInfoService;
 import com.ling.utils.StringUtil;
 import com.ling.utils.SysCacheUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,12 +34,15 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserInfoServiceImpl implements UserInfoService {
+    private Logger log = LoggerFactory.getLogger(UserInfoServiceImpl.class);
     @Resource
     private UserInfoMapper userInfoMapper;
     @Autowired
     private MailCodeMapper mailCodeMapper;
     @Resource
     private UserMessageMapper userMessageMapper;
+    @Resource
+    private UserPointsRecodeMapper userPointsRecodeMapper;
 
     @Override
     public PageBean<UserInfo> find(UserInfo userInfo) {
@@ -174,19 +182,49 @@ public class UserInfoServiceImpl implements UserInfoService {
         userInfo.setStatus(UserStatusEnum.ENABLE.getStatus());
         userInfo.setCreateTime(date);
         userInfo.setUpdateTime(date);
+        userInfo.setVersion(Constant.NUM_0);    // 版本号初始为0
         userInfoMapper.insert(userInfo);
         // 将邮箱验证码置为无效
         mailCodeMapper.updateStatusByMail(mail);
 
+        // 注册成功更新积分，5积分
+        operationPoints(uid, OperationTypeEnum.REGISTER.getType(), Constant.NUM_5);
+
         // 注册成功，向用户发送消息欢迎消息，消息内容从系统设置中获取
         UserMessage userMessage = new UserMessage();
         userMessage.setReceivedUserId(uid);     // 接收者，即新用户
-        userMessage.setMessageType(MessageTypeEnum.SYS_MESSAGE.getCode());   // 消息类型：系统消息
+        userMessage.setMessageType(MessageTypeEnum.SYS_MESSAGE.getType());   // 消息类型：系统消息
         String welcomeInfo = SysCacheUtil.getSysSettingContainer().getSysSetting4Register().getWelcomeInfo(); // 消息内容：从系统设置中获取
         userMessage.setMessageContent(welcomeInfo);
-        userMessage.setStatus(MessageStatus.NO_READ.getCode());      // 状态：未读
+        userMessage.setStatus(MessageStatusEnum.NO_READ.getStatus());      // 状态：未读
         userMessage.setCreateTime(date);
         userMessage.setUpdateTime(date);
         userMessageMapper.insert(userMessage);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void operationPoints(String userId, Integer operationType, Integer points) {
+        try {
+            if (points == 0) return;
+            UserInfo userInfo = userInfoMapper.selectById(userId);
+            Integer currentPoints = userInfo.getCurrentIntegral();
+            Integer version = userInfo.getVersion();
+            log.info("当前用户积分版本为: {}", version);
+            currentPoints = Math.max(currentPoints + points, 0);    // 积分不能为负数
+            Integer row = userInfoMapper.updatePoints(userId, currentPoints, points, version);
+            if (row == 0) throw new BusinessException(CommonMsg.POINTS_OPERATION_FAIL);
+            // 记录积分操作记录
+            UserPointsRecode userPointsRecode = new UserPointsRecode();
+            userPointsRecode.setUserId(userId);
+            userPointsRecode.setOperationType(operationType);
+            userPointsRecode.setPoints(points);
+            Date date = new Date();
+            userPointsRecode.setCreateTime(date);
+            userPointsRecode.setUpdateTime(date);
+            userPointsRecodeMapper.insert(userPointsRecode);
+        } catch (Exception e) {
+            throw new BusinessException(CommonMsg.POINTS_OPERATION_FAIL, e);
+        }
     }
 }

@@ -3,18 +3,18 @@ package com.ling.enums;
 /**
  * 消息状态枚举
  */
-public enum MessageStatus {
+public enum MessageStatusEnum {
     NO_READ(0, "未读"), READ(1, "已读");
-    private Integer code;
+    private Integer status;
     private String message;
 
-    MessageStatus(Integer code, String message) {
-        this.code = code;
+    MessageStatusEnum(Integer code, String message) {
+        this.status = code;
         this.message = message;
     }
 
-    public int getCode() {
-        return code;
+    public int getStatus() {
+        return status;
     }
 
     public String getMessage() {

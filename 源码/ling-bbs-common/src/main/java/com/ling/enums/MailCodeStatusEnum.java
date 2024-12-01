@@ -1,5 +1,8 @@
 package com.ling.enums;
 
+/**
+ * 邮箱验证码状态枚举类
+ */
 public enum MailCodeStatusEnum {
     NOT_USE(0, "未使用"),
     USE(1, "已使用");

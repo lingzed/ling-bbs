@@ -5,6 +5,7 @@ import com.github.pagehelper.PageHelper;
 import com.ling.commons.CommonMsg;
 import com.ling.config.WebConfig;
 import com.ling.constant.Constant;
+import com.ling.entity.dto.SysSetting4Mail;
 import com.ling.entity.po.MailCode;
 import com.ling.entity.po.UserInfo;
 import com.ling.entity.vo.PageBean;
@@ -14,6 +15,7 @@ import com.ling.mappers.MailCodeMapper;
 import com.ling.mappers.UserInfoMapper;
 import com.ling.service.MailCodeService;
 import com.ling.utils.StringUtil;
+import com.ling.utils.SysCacheUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -179,8 +181,9 @@ public class MailCodeServiceImpl implements MailCodeService {
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
             mimeMessageHelper.setFrom(webConfig.getMailSender());   // 设置发件人
             mimeMessageHelper.setTo(mail);                          // 设置收件人
-            mimeMessageHelper.setSubject("邮箱验证码");              // 设置主题
-            mimeMessageHelper.setText("您的验证码是: " + mCode);      // 设置内容
+            SysSetting4Mail sysSetting4Mail = SysCacheUtil.getSysSettingContainer().getSysSetting4Mail();
+            mimeMessageHelper.setSubject(sysSetting4Mail.getMailTitle());   // 设置主题
+            mimeMessageHelper.setText(String.format(sysSetting4Mail.getMailContent(), mCode));      // 设置内容
             mimeMessageHelper.setSentDate(new Date());              // 设置发送时间
             javaMailSender.send(mimeMessage);
         } catch (Exception e) {

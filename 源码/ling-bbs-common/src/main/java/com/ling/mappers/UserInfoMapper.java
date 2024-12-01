@@ -70,6 +70,16 @@ public interface UserInfoMapper {
     void batchUpdate(@Param("userInfos") List<UserInfo> userInfos);
 
     /**
+     * 更新积分
+     * @param userId            用户id
+     * @param currentPoints     增量后的当前积分
+     * @param points            积分增量(加/减)
+     * @param version           版本号
+     * @return
+     */
+    Integer updatePoints(String userId, Integer currentPoints, Integer points, Integer version);
+
+    /**
      * 删除/批量删除
      *
      * @param ids

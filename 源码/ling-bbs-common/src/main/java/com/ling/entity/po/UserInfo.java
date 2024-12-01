@@ -5,6 +5,9 @@ import com.ling.entity.param.BusinessParam;
 
 import java.util.Date;
 
+/**
+ * 用户信息实体
+ */
 public class UserInfo extends BusinessParam<UserInfo> {
     private String userId;
     private String nickName;
@@ -25,6 +28,7 @@ public class UserInfo extends BusinessParam<UserInfo> {
     private Date createTime;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date updateTime;
+    private Integer version;    // 乐观锁
 
 
     public UserInfo() {
@@ -48,8 +52,17 @@ public class UserInfo extends BusinessParam<UserInfo> {
         this.updateTime = updateTime;
     }
 
+    public Integer getVersion() {
+        return version;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
+    }
+
     /**
      * 获取
+     *
      * @return userId
      */
     public String getUserId() {
@@ -58,6 +71,7 @@ public class UserInfo extends BusinessParam<UserInfo> {
 
     /**
      * 设置
+     *
      * @param userId
      */
     public void setUserId(String userId) {
@@ -66,6 +80,7 @@ public class UserInfo extends BusinessParam<UserInfo> {
 
     /**
      * 获取
+     *
      * @return nickName
      */
     public String getNickName() {
@@ -74,6 +89,7 @@ public class UserInfo extends BusinessParam<UserInfo> {
 
     /**
      * 设置
+     *
      * @param nickName
      */
     public void setNickName(String nickName) {
@@ -82,6 +98,7 @@ public class UserInfo extends BusinessParam<UserInfo> {
 
     /**
      * 获取
+     *
      * @return email
      */
     public String getEmail() {
@@ -90,6 +107,7 @@ public class UserInfo extends BusinessParam<UserInfo> {
 
     /**
      * 设置
+     *
      * @param email
      */
     public void setEmail(String email) {
@@ -98,6 +116,7 @@ public class UserInfo extends BusinessParam<UserInfo> {
 
     /**
      * 获取
+     *
      * @return password
      */
     public String getPassword() {
@@ -106,6 +125,7 @@ public class UserInfo extends BusinessParam<UserInfo> {
 
     /**
      * 设置
+     *
      * @param password
      */
     public void setPassword(String password) {
@@ -114,6 +134,7 @@ public class UserInfo extends BusinessParam<UserInfo> {
 
     /**
      * 获取
+     *
      * @return gander
      */
     public Integer getGander() {
@@ -122,6 +143,7 @@ public class UserInfo extends BusinessParam<UserInfo> {
 
     /**
      * 设置
+     *
      * @param gander
      */
     public void setGander(Integer gander) {
@@ -130,6 +152,7 @@ public class UserInfo extends BusinessParam<UserInfo> {
 
     /**
      * 获取
+     *
      * @return description
      */
     public String getDescription() {
@@ -138,6 +161,7 @@ public class UserInfo extends BusinessParam<UserInfo> {
 
     /**
      * 设置
+     *
      * @param description
      */
     public void setDescription(String description) {
@@ -146,6 +170,7 @@ public class UserInfo extends BusinessParam<UserInfo> {
 
     /**
      * 获取
+     *
      * @return joinTime
      */
     public Date getJoinTime() {
@@ -154,6 +179,7 @@ public class UserInfo extends BusinessParam<UserInfo> {
 
     /**
      * 设置
+     *
      * @param joinTime
      */
     public void setJoinTime(Date joinTime) {
@@ -162,6 +188,7 @@ public class UserInfo extends BusinessParam<UserInfo> {
 
     /**
      * 获取
+     *
      * @return lastLoginTime
      */
     public Date getLastLoginTime() {
@@ -170,6 +197,7 @@ public class UserInfo extends BusinessParam<UserInfo> {
 
     /**
      * 设置
+     *
      * @param lastLoginTime
      */
     public void setLastLoginTime(Date lastLoginTime) {
@@ -178,6 +206,7 @@ public class UserInfo extends BusinessParam<UserInfo> {
 
     /**
      * 获取
+     *
      * @return lastLoginIp
      */
     public String getLastLoginIp() {
@@ -186,6 +215,7 @@ public class UserInfo extends BusinessParam<UserInfo> {
 
     /**
      * 设置
+     *
      * @param lastLoginIp
      */
     public void setLastLoginIp(String lastLoginIp) {
@@ -194,6 +224,7 @@ public class UserInfo extends BusinessParam<UserInfo> {
 
     /**
      * 获取
+     *
      * @return lastLoginIpAddress
      */
     public String getLastLoginIpAddress() {
@@ -202,6 +233,7 @@ public class UserInfo extends BusinessParam<UserInfo> {
 
     /**
      * 设置
+     *
      * @param lastLoginIpAddress
      */
     public void setLastLoginIpAddress(String lastLoginIpAddress) {
@@ -210,6 +242,7 @@ public class UserInfo extends BusinessParam<UserInfo> {
 
     /**
      * 获取
+     *
      * @return totalIntegral
      */
     public Integer getTotalIntegral() {
@@ -218,6 +251,7 @@ public class UserInfo extends BusinessParam<UserInfo> {
 
     /**
      * 设置
+     *
      * @param totalIntegral
      */
     public void setTotalIntegral(Integer totalIntegral) {
@@ -226,6 +260,7 @@ public class UserInfo extends BusinessParam<UserInfo> {
 
     /**
      * 获取
+     *
      * @return currentIntegral
      */
     public Integer getCurrentIntegral() {
@@ -234,6 +269,7 @@ public class UserInfo extends BusinessParam<UserInfo> {
 
     /**
      * 设置
+     *
      * @param currentIntegral
      */
     public void setCurrentIntegral(Integer currentIntegral) {
@@ -242,6 +278,7 @@ public class UserInfo extends BusinessParam<UserInfo> {
 
     /**
      * 获取
+     *
      * @return status
      */
     public Integer getStatus() {
@@ -250,6 +287,7 @@ public class UserInfo extends BusinessParam<UserInfo> {
 
     /**
      * 设置
+     *
      * @param status
      */
     public void setStatus(Integer status) {
@@ -258,6 +296,7 @@ public class UserInfo extends BusinessParam<UserInfo> {
 
     /**
      * 获取
+     *
      * @return createTime
      */
     public Date getCreateTime() {
@@ -266,6 +305,7 @@ public class UserInfo extends BusinessParam<UserInfo> {
 
     /**
      * 设置
+     *
      * @param createTime
      */
     public void setCreateTime(Date createTime) {
@@ -274,6 +314,7 @@ public class UserInfo extends BusinessParam<UserInfo> {
 
     /**
      * 获取
+     *
      * @return updateTime
      */
     public Date getUpdateTime() {
@@ -282,6 +323,7 @@ public class UserInfo extends BusinessParam<UserInfo> {
 
     /**
      * 设置
+     *
      * @param updateTime
      */
     public void setUpdateTime(Date updateTime) {

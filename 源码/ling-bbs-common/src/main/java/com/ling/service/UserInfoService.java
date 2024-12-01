@@ -85,4 +85,13 @@ public interface UserInfoService {
      * @param mailCode
      */
     void register(String nickname, String password, String mail, String checkCode, String sCheckCode, String mailCode);
+
+    /**
+     * 积分操作
+     *
+     * @param userId        用户id
+     * @param operationType 操作类型
+     * @param points        积分
+     */
+    void operationPoints(String userId, Integer operationType, Integer points);
 }

@@ -10,16 +10,16 @@ public enum MessageTypeEnum {
     COMMENT_LIKE(3, "评论点赞"),
     ATTACHMENT(4, "附件下载");
 
-    private Integer code;
+    private Integer type;
     private String message;
 
     MessageTypeEnum(Integer code, String message) {
-        this.code = code;
+        this.type = code;
         this.message = message;
     }
 
-    public int getCode() {
-        return code;
+    public int getType() {
+        return type;
     }
 
     public String getMessage() {

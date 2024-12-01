@@ -20,6 +20,7 @@
         , status
         , create_time
         , update_time
+        , version
     </sql>
     <!-- 通用查询sql -->
     <sql id="commonSelect">
@@ -100,7 +101,8 @@
         #{currentIntegral},
         #{status},
         #{createTime},
-        #{updateTime})
+        #{updateTime},
+        #{version})
     </insert>
 
     <!-- 批量插入 -->
@@ -121,7 +123,8 @@
             #{item.currentIntegral},
             #{item.status},
             #{item.createTime},
-            #{item.updateTime})
+            #{item.updateTime},
+            #{item.version})
         </foreach>
     </insert>
 
@@ -145,6 +148,7 @@
             <if test="status != null">status = #{status},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="version != null">version = #{version},</if>
         </set>
         <where>
             <if test="userId != null and userId != ''">
@@ -200,6 +204,7 @@
                 <if test="item.updateTime != null">
                     update_time = #{item.updateTime},
                 </if>
+                <if test="version != null">version = #{item.version},</if>
             </set>
             <where>
                 <if test="item.userId != null and item.userId != ''">
@@ -209,6 +214,25 @@
         </foreach>
     </update>
 
+    <!-- 更新用户积分 -->
+    <update id="updatePoints">
+        update user_info
+        <set>
+            <if test="currentPoints != null">
+                current_integral = #{currentPoints},
+            </if>
+            <if test="points != null and points > 0">
+                total_integral = total_integral + #{points},
+            </if>
+            <if test="version != null">
+                version = version + 1,      <!-- 乐观锁 -->
+            </if>
+        </set>
+        <where>
+            <if test="userId != null and userId != ''">user_id = #{userId}</if>
+            <if test="version != null">and version = #{version}</if>
+        </where>
+    </update>
 
     <!-- 删除/批量删除 -->
     <delete id="delete">
