@@ -1,0 +1,76 @@
+package com.ling.utils;
+
+import com.ling.enums.ResponseCodeEnum;
+import com.ling.exception.BusinessException;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * OkHttp工具类
+ */
+public class OkHttpUtil {
+    private static Logger log = LoggerFactory.getLogger(OkHttpUtil.class);
+    private static final int TIMEOUT_SECS = 5;  // 超时时间
+
+    /**
+     * 获取OkHttpClient.Builder
+     *
+     * @return
+     */
+    private static OkHttpClient.Builder getClientBuilder() {
+        OkHttpClient.Builder clientBuilder = new OkHttpClient.Builder()
+                .followRedirects(false)
+                .retryOnConnectionFailure(false);
+        clientBuilder.connectTimeout(TIMEOUT_SECS, TimeUnit.SECONDS)
+                .readTimeout(TIMEOUT_SECS, TimeUnit.SECONDS);
+        return clientBuilder;
+    }
+
+    /**
+     * 获取Request.Builder
+     *
+     * @param header
+     * @return
+     */
+    private static Request.Builder getRequestBuilder(Map<String, String> header) {
+        Request.Builder requestBuilder = new Request.Builder();
+        if (header != null) {
+            header.forEach(requestBuilder::addHeader);
+        }
+        return requestBuilder;
+    }
+
+    /**
+     * GET请求
+     *
+     * @param url
+     * @return
+     */
+    public static String getRequest(String url) {
+        try {
+            OkHttpClient.Builder clientBuilder = getClientBuilder();
+            Request.Builder requestBuilder = getRequestBuilder(null);
+            OkHttpClient client = clientBuilder.build();
+            Request request = requestBuilder.url(url).build();
+            Response response = client.newCall(request).execute();
+            try (ResponseBody body = response.body()) {
+                return body.string();
+            }
+        } catch (SocketTimeoutException | ConnectException e) {
+            log.error("OkHttp POST 请求超时, url: {}", url, e);
+            throw new BusinessException(ResponseCodeEnum.CODE_900, e);
+        } catch (Exception e) {
+            log.error("OkHttp GET 请求异常");
+            return null;
+        }
+    }
+}
