@@ -35,3 +35,19 @@ create table forum_board
 ```
 
 板块存在层级，因此有父级id，根板块的pid为0，响应给前端的数据是树形结构。
+
+## 1.2 创建CRUD
+
+快速CRUD参考[springboot-vue-note](https://github.com/lingzed/springboot-vue-note)第26章。
+
+有一些细节需要注意，板块返回给前端的是一个树形结构的数据，后端使用【TreeUtil】工具类转换为有层次的【List】，使用【TreeUtil】需要实体实现【TreeNode】接口，在转换时，用到的【pid】是字符串，因此需要实现【getId()】和【getParentId()】时，需要返回字符串id：
+
+![image-20241229120956082](assets/image-20241229120956082.png)
+
+有层次的【List】一般不需要分页，因为分页可能导致父节点的某些子节点显示不全，直接转换为层次【List】返回即可：
+
+![image-20241229123526969](assets/image-20241229123526969.png)
+
+响应的数据：
+
+![image-20241229123954019](assets/image-20241229123954019.png)
