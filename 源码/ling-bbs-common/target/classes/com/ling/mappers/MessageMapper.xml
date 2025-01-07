@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ling.mappers.MessageMapper">
+
+    <!-- 通用字段 -->
+    <sql id="commonField">
+        message_id
+        , received_user_id
+        , article_id
+        , article_title
+        , comment_id
+        , send_user_id
+        , send_nick_name
+        , message_type
+        , message_content
+        , status
+        , create_time
+        , update_time
+    </sql>
+
+    <!-- 通用查询sql -->
+    <sql id="commonSelect">
+        select
+        <include refid="commonField"/>
+    </sql>
+
+    <!-- 条件分页查询引用 -->
+    <sql id="conditionSelect">
+        <include refid="commonSelect"/>
+        from user_message
+        <where>
+            <if test="articleTitle != null and articleTitle != ''">
+                article_title like concat('%', #{articleTitle}, '%')
+            </if>
+            <if test="sendNickName != null and sendNickName != ''">
+                send_nick_name like concat('%', #{sendNickName}, '%')
+            </if>
+            <if test="messageType != null">
+                and message_type = #{messageType}
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+        </where>
+    </sql>
+
+    <!-- 条件分页查询，返回po -->
+    <select id="selectByCondition" resultType="com.ling.entity.po.Message">
+        <include refid="conditionSelect"/>
+    </select>
+
+    <!-- 查询所有 -->
+    <select id="selectAll" resultType="com.ling.entity.po.Message">
+        <include refid="commonSelect"/>
+        from user_message
+    </select>
+
+    <!-- 通过id查询 -->
+    <select id="selectById" resultType="com.ling.entity.po.Message">
+        <include refid="commonSelect"/>
+        from user_message
+        <where>
+            <if test="messageId != null">
+                message_id = #{messageId}
+            </if>
+        </where>
+    </select>
+
+    <!-- 插入 -->
+    <insert id="insert">
+        insert into user_message(<include refid="commonField"/>) values(
+        #{messageId},
+        #{receivedUserId},
+        #{articleId},
+        #{articleTitle},
+        #{commentId},
+        #{sendUserId},
+        #{sendNickName},
+        #{messageType},
+        #{messageContent},
+        #{status},
+        #{createTime},
+        #{updateTime})
+    </insert>
+
+    <!-- 批量插入 -->
+    <insert id="batchInsert">
+        insert into user_message(<include refid="commonField"/>) values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.messageId},
+            #{item.receivedUserId},
+            #{item.articleId},
+            #{item.articleTitle},
+            #{item.commentId},
+            #{item.sendUserId},
+            #{item.sendNickName},
+            #{item.messageType},
+            #{item.messageContent},
+            #{item.status},
+            #{item.createTime},
+            #{item.updateTime})
+        </foreach>
+    </insert>
+
+    <!-- 更新 -->
+    <update id="update">
+        update user_message
+        <set>
+            <if test="receivedUserId != null and receivedUserId != ''">received_user_id = #{receivedUserId},</if>
+            <if test="articleId != null and articleId != ''">article_id = #{articleId},</if>
+            <if test="articleTitle != null and articleTitle != ''">article_title = #{articleTitle},</if>
+            <if test="commentId != null">comment_id = #{commentId},</if>
+            <if test="sendUserId != null and sendUserId != ''">send_user_id = #{sendUserId},</if>
+            <if test="sendNickName != null and sendNickName != ''">send_nick_name = #{sendNickName},</if>
+            <if test="messageType != null">message_type = #{messageType},</if>
+            <if test="messageContent != null and messageContent != ''">message_content = #{messageContent},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </set>
+        <where>
+            <if test="messageId != null">message_id = #{messageId}</if>
+        </where>
+    </update>
+
+    <!-- 批量更新 -->
+    <update id="batchUpdate">
+        <foreach collection="list" item="item" separator=";">
+            update user_message
+            <set>
+                <if test="item.receivedUserId != null and item.receivedUserId != ''">received_user_id = #{item.receivedUserId},</if>
+                <if test="item.articleId != null and item.articleId != ''">article_id = #{item.articleId},</if>
+                <if test="item.articleTitle != null and item.articleTitle != ''">article_title = #{item.articleTitle},</if>
+                <if test="item.commentId != null">comment_id = #{item.commentId},</if>
+                <if test="item.sendUserId != null and item.sendUserId != ''">send_user_id = #{item.sendUserId},</if>
+                <if test="item.sendNickName != null and item.sendNickName != ''">send_nick_name = #{item.sendNickName},</if>
+                <if test="item.messageType != null">message_type = #{item.messageType},</if>
+                <if test="item.messageContent != null and item.messageContent != ''">message_content = #{item.messageContent},</if>
+                <if test="item.status != null">status = #{item.status},</if>
+                <if test="item.createTime != null">create_time = #{item.createTime},</if>
+                <if test="item.updateTime != null">update_time = #{item.updateTime},</if>
+            </set>
+            <where>
+                <if test="item.messageId != null">message_id = #{item.messageId}</if>
+            </where>
+        </foreach>
+    </update>
+
+    <!-- 删除/批量删除 -->
+    <delete id="delete">
+        delete from user_message where message_id in
+        <foreach collection="list" item="id" separator="," open="(" close=")">
+            <if test="id != null">#{id}</if>
+        </foreach>
+    </delete>
+</mapper>
