@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ling.mappers.UserPointsRecordMapper">
+
+    <!-- 通用字段 -->
+    <sql id="commonField">
+        record_id
+        , user_id
+        , operation_type
+        , points
+        , create_time
+        , update_time
+    </sql>
+
+    <!-- 通用查询sql -->
+    <sql id="commonSelect">
+        select
+        <include refid="commonField"/>
+    </sql>
+
+    <!-- 条件分页查询引用 -->
+    <sql id="conditionSelect">
+        <include refid="commonSelect"/>
+        from user_points_record
+        <where>
+            <if test="operationType != null">
+                and operation_type = #{operationType}
+            </if>
+            <if test="points != null">
+                and points = #{points}
+            </if>
+        </where>
+    </sql>
+
+    <!-- 条件分页查询，返回po -->
+    <select id="selectByCondition" resultType="com.ling.entity.po.UserPointsRecord">
+        <include refid="conditionSelect"/>
+    </select>
+
+    <!-- 条件分页查询，返回vo -->
+<!--    <select id="selectVoListByCondition" resultType="com.ling.entity.vo.UserPointsrecordVo">-->
+<!--        <include refid="conditionSelect"/>-->
+<!--    </select>-->
+
+    <!-- 查询所有 -->
+    <select id="selectAll" resultType="com.ling.entity.po.UserPointsRecord">
+        <include refid="commonSelect"/>
+        from user_points_record
+    </select>
+
+    <!-- 通过id查询 -->
+    <select id="selectById" resultType="com.ling.entity.po.UserPointsRecord">
+        <include refid="commonSelect"/>
+        from user_points_record
+        <where>
+            <if test="recordId != null">
+                record_id = #{recordId}
+            </if>
+        </where>
+    </select>
+
+    <!-- 插入 -->
+    <insert id="insert">
+        insert into user_points_record(<include refid="commonField"/>) values(
+        #{recordId},
+        #{userId},
+        #{operationType},
+        #{points},
+        #{createTime},
+        #{updateTime})
+    </insert>
+
+    <!-- 批量插入 -->
+    <insert id="batchInsert">
+        insert into user_points_record(<include refid="commonField"/>) values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.recordId},
+            #{item.userId},
+            #{item.operationType},
+            #{item.points},
+            #{item.createTime},
+            #{item.updateTime})
+        </foreach>
+    </insert>
+
+    <!-- 更新 -->
+    <update id="update">
+        update user_points_record
+        <set>
+            <if test="userId != null and userId != ''">user_id = #{userId},</if>
+            <if test="operationType != null">operation_type = #{operationType},</if>
+            <if test="points != null">points = #{points},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </set>
+        <where>
+            <if test="recordId != null">record_id = #{recordId}</if>
+        </where>
+    </update>
+
+    <!-- 批量更新 -->
+    <update id="batchUpdate">
+        <foreach collection="list" item="item" separator=";">
+            update user_points_record
+            <set>
+                <if test="item.userId != null and item.userId != ''">user_id = #{item.userId},</if>
+                <if test="item.operationType != null">operation_type = #{item.operationType},</if>
+                <if test="item.points != null">points = #{item.points},</if>
+                <if test="item.createTime != null">create_time = #{item.createTime},</if>
+                <if test="item.updateTime != null">update_time = #{item.updateTime},</if>
+            </set>
+            <where>
+                <if test="item.recordId != null">record_id = #{item.recordId}</if>
+            </where>
+        </foreach>
+    </update>
+
+    <!-- 删除/批量删除 -->
+    <delete id="delete">
+        delete from user_points_record where record_id in
+        <foreach collection="list" item="id" separator="," open="(" close=")">
+            <if test="id != null">#{id}</if>
+        </foreach>
+    </delete>
+</mapper>

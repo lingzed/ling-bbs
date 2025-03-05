@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ling.mappers.FileUseRecordMapper">
+
+    <!-- 通用字段 -->
+    <sql id="commonField">
+        record_id
+        , target_id
+        , uploader_id
+        , filename
+        , filepath
+        , status
+    </sql>
+
+    <!-- 查询所有 -->
+    <select id="selectAll" resultType="com.ling.entity.po.FileUseRecord">
+        select
+        <include refid="commonField"/>
+        from file_use_record
+    </select>
+
+    <!-- 查询总数量 -->
+    <select id="selectCount" resultType="java.lang.Long">
+        select count(0) total
+        from file_use_record
+    </select>
+
+    <!-- 通过id查询 -->
+    <select id="selectById" resultType="com.ling.entity.po.FileUseRecord">
+        select
+        <include refid="commonField"/>
+        from file_use_record where record_id = #{recordId}
+    </select>
+
+    <!-- 通过 id && uploaderId 查询 -->
+    <select id="selectByIdAndUploaderId" resultType="com.ling.entity.po.FileUseRecord">
+        select
+        <include refid="commonField"/>
+        from file_use_record where record_id = #{recordId} and uploader_id = #{uploaderId}
+    </select>
+
+    <!-- 查询未使用 -->
+    <select id="selectUnused" resultType="com.ling.entity.po.FileUseRecord">
+        select
+        <include refid="commonField"/>
+        from file_use_record where status = 0
+    </select>
+
+    <!-- 插入 -->
+    <insert id="insert">
+        insert into file_use_record(<include refid="commonField"/>) values(
+        #{recordId},
+        #{targetId},
+        #{uploaderId},
+        #{filename},
+        #{filepath},
+        #{status})
+    </insert>
+
+    <!-- 批量插入 -->
+    <insert id="batchInsert">
+        insert into file_use_record(<include refid="commonField"/>) values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.recordId},
+            (#{item.targetId},
+            #{item.uploaderId},
+            #{item.filename},
+            #{item.filepath},
+            #{item.status})
+        </foreach>
+    </insert>
+
+    <!-- 更新 -->
+    <update id="update">
+        update file_use_record
+        <set>
+            <if test="targetId != null and targetId != ''">target_id = #{targetId},</if>
+            <if test="uploaderId != null and uploaderId != ''">uploader_id = #{uploaderId},</if>
+            <if test="filename != null and filename != ''">filename = #{filename},</if>
+            <if test="filepath != null and filepath != ''">filepath = #{filepath},</if>
+            <if test="status != null">status = #{status},</if>
+        </set>
+        where record_id = #{recordId}
+    </update>
+
+    <!-- 批量更新 -->
+    <update id="batchUpdate">
+        <foreach collection="list" item="item" separator=";">
+            update file_use_record
+            <set>
+                <if test="targetId != null and targetId != ''">target_id = #{item.targetId},</if>
+                <if test="item.uploaderId != null and item.uploaderId != ''">uploader_id = #{item.uploaderId},</if>
+                <if test="item.filename != null and item.filename != ''">filename = #{item.filename},</if>
+                <if test="item.filepath != null and item.filepath != ''">filepath = #{item.filepath},</if>
+                <if test="item.status != null">status = #{item.status},</if>
+            </set>
+            where record_id = #{item.recordId}
+        </foreach>
+    </update>
+
+    <!-- 删除/批量删除 -->
+    <delete id="delete">
+        delete from file_use_record where record_id in
+        <foreach collection="list" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!-- 删除未使用 -->
+    <delete id="deleteUnused">
+        delete
+        from file_use_record
+        where status = 0
+    </delete>
+</mapper>
