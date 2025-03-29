@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ling.mappers.CommentMapper">
+
+    <!-- 通用字段 -->
+    <sql id="commonField">
+        comment_id
+        , p_comment_id
+        , article_id
+        , img_path
+        , content
+        , sender_avatar
+        , sender_id
+        , sender_nickname
+        , sender_ip_address
+        , receiver_id
+        , receiver_nickname
+        , top_type
+        , like_count
+        , status
+        , post_time
+    </sql>
+
+    <!-- 查询条件 -->
+    <sql id="queryCondition">
+        <where>
+            <if test="articleId != null and articleId != ''">
+                article_id = #{articleId}
+            </if>
+            <if test="pCommentId != null">
+                and p_comment_id = #{pCommentId}
+            </if>
+            <if test="commentId != null">
+                and comment_id = #{commentId}
+            </if>
+            <if test="senderId != null and senderId != ''">
+                and sender_id = #{senderId}
+            </if>
+            <if test="receiverId != null and receiverId != ''">
+                and receiver_id = #{receiverId}
+            </if>
+            <!-- 管理员不能看删除的评论 -->
+            <if test="isAdmin != null and isAdmin">
+                and status != 0
+            </if>
+            <!-- 普通用户只能看审核或自己的未审核评论 -->
+            <if test="userId != null and userId != '' and !isAdmin">
+                and (status = 2 or (status = 1 and sender_id = #{userId}))
+            </if>
+            <!-- 未登录用户只能看审核的评论 -->
+            <if test="userId == null or userId == ''">
+                and status = 2
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+            <if test="pIds != null">
+                and p_comment_id in
+                <foreach collection="pIds" item="id" separator="," open="(" close=")">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="startPostTime != null and endPostTime != null">
+                and post_time between #{startPostTime} and #{endPostTime}
+            </if>
+        </where>
+    </sql>
+
+    <!-- 条件分页查询，返回po -->
+    <select id="selectByCondition" resultType="com.ling.entity.po.Comment">
+        select
+        <include refid="commonField"/>
+        <!-- 关联点赞记录表，如果有记录则点过赞，否则未点赞 -->
+        <if test="userId != null">
+            , (select count(0) from like_record where target_id = comment_id and liker_id = #{userId}) do_like
+        </if>
+        from comment
+        <include refid="queryCondition"/>
+        <if test="orderBy != null and orderBy != ''">
+            order by ${orderBy}
+        </if>
+        <if test="index != null and size != null">
+            limit #{index}, #{size}
+        </if>
+    </select>
+
+    <!-- 条件查询总数量 -->
+    <select id="selectCountByCondition" resultType="java.lang.Long">
+        select count(0) total from comment
+        <include refid="queryCondition"/>
+    </select>
+
+    <!-- 查询所有 -->
+    <select id="selectAll" resultType="com.ling.entity.po.Comment">
+        select
+        <include refid="commonField"/>
+        from comment
+    </select>
+
+    <!-- 查询总数量 -->
+    <select id="selectCount" resultType="java.lang.Long">
+        select count(0) total
+        from comment
+    </select>
+
+    <!-- 通过id查询 -->
+    <select id="selectById" resultType="com.ling.entity.po.Comment">
+        select
+        <include refid="commonField"/>
+        from comment where comment_id = #{commentId}
+    </select>
+
+    <!-- 查询评论的点赞量和点赞状态 -->
+    <select id="selectCommentLikeInfo" resultType="com.ling.entity.vo.CommentLikeInfo">
+        select comment_id,
+               like_count,
+               (select count(0) from like_record where target_id = #{commentId} and liker_id = #{userId}) doLike
+        from comment
+        where comment_id = #{commentId}
+    </select>
+
+    <!-- 插入 -->
+    <insert id="insert" useGeneratedKeys="true" keyProperty="commentId">
+        insert into comment(<include refid="commonField"/>) values(
+        #{commentId},
+        #{pCommentId},
+        #{articleId},
+        #{imgPath},
+        #{content},
+        #{senderAvatar},
+        #{senderId},
+        #{senderNickname},
+        #{senderIpAddress},
+        #{receiverId},
+        #{receiverNickname},
+        #{topType},
+        #{likeCount},
+        #{status},
+        #{postTime})
+    </insert>
+
+    <!-- 批量插入 -->
+    <insert id="batchInsert">
+        insert into comment(<include refid="commonField"/>) values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.commentId},
+            #{item.pCommentId},
+            #{item.articleId},
+            #{item.imgPath},
+            #{item.content},
+            #{item.senderAvatar},
+            #{item.senderId},
+            #{item.senderNickname},
+            #{item.senderIpAddress},
+            #{item.receiverId},
+            #{item.receiverNickname},
+            #{item.topType},
+            #{item.likeCount},
+            #{item.status},
+            #{item.postTime})
+        </foreach>
+    </insert>
+
+    <!-- 更新 -->
+    <update id="update">
+        update comment
+        <set>
+            <if test="pCommentId != null">p_comment_id = #{pCommentId},</if>
+            <if test="articleId != null and articleId != ''">article_id = #{articleId},</if>
+            <if test="imgPath != null and imgPath != ''">img_path = #{imgPath},</if>
+            <if test="content != null and content != ''">content = #{content},</if>
+            <if test="senderAvatar != null and senderAvatar != ''">sender_avatar = #{senderAvatar},</if>
+            <if test="senderId != null and senderId != ''">sender_id = #{senderId},</if>
+            <if test="senderNickname != null and senderNickname != ''">sender_nickname = #{senderNickname},</if>
+            <if test="senderIpAddress != null and senderIpAddress != ''">sender_ip_address = #{senderIpAddress},</if>
+            <if test="receiverId != null and receiverId != ''">receiver_id = #{receiverId},</if>
+            <if test="receiverNickname != null and receiverNickname != ''">receiver_nickname = #{receiverNickname},</if>
+            <if test="topType != null">top_type = #{topType},</if>
+            <if test="likeCount != null">like_count = #{likeCount},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="postTime != null">post_time = #{postTime},</if>
+        </set>
+        where comment_id = #{commentId}
+    </update>
+
+    <update id="updateLikeCount">
+        update comment
+        set like_count = like_count + #{likeCount}
+        where comment_id = #{commentId};
+    </update>
+
+    <!-- 批量更新 -->
+    <update id="batchUpdate">
+        <foreach collection="list" item="item" separator=";">
+            update comment
+            <set>
+                <if test="item.pCommentId != null">p_comment_id = #{item.pCommentId},</if>
+                <if test="item.articleId != null and item.articleId != ''">article_id = #{item.articleId},</if>
+                <if test="item.imgPath != null and item.imgPath != ''">img_path = #{item.imgPath},</if>
+                <if test="item.content != null and item.content != ''">content = #{item.content},</if>
+                <if test="item.senderAvatar != null and item.senderAvatar != ''">sender_avatar = #{item.senderAvatar},</if>
+                <if test="item.senderId != null and item.senderId != ''">sender_id = #{item.senderId},</if>
+                <if test="item.senderNickname != null and item.senderNickname != ''">sender_nickname =
+                    #{item.senderNickname},
+                </if>
+                <if test="item.senderIpAddress != null and item.senderIpAddress != ''">sender_ip_address =
+                    #{item.senderIpAddress},
+                </if>
+                <if test="item.receiverId != null and item.receiverId != ''">receiver_id = #{item.receiverId},</if>
+                <if test="item.receiverNickname != null and item.receiverNickname != ''">receiver_nickname =
+                    #{item.receiverNickname},
+                </if>
+                <if test="item.topType != null">top_type = #{item.topType},</if>
+                <if test="item.likeCount != null">like_count = #{item.likeCount},</if>
+                <if test="item.status != null">status = #{item.status},</if>
+                <if test="item.postTime != null">post_time = #{item.postTime},</if>
+            </set>
+            where comment_id = #{item.commentId}
+        </foreach>
+    </update>
+
+    <!-- 更新头像 -->
+    <update id="updateAvatar">
+        update comment set sender_avatar = #{senderAvatar} where sender_id = #{senderId}
+    </update>
+
+    <!-- 删除/批量删除 -->
+    <delete id="delete">
+        delete from comment where comment_id in
+        <foreach collection="list" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

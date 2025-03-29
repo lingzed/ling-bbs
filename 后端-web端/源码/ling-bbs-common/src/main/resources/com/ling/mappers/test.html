@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+
+        .navbar {
+            display: flex;
+            background-color: #333;
+            padding: 0.5em;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5em 1em;
+        }
+
+        .navbar a:hover {
+            background-color: #575757;
+        }
+
+        .input-container {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100%;
+        }
+
+        label {
+            margin-right: 10px;
+            font-weight: bold;
+            font-size: 16px;
+            white-space: nowrap; /* 防止标签文字换行 */
+            flex-shrink: 0; /* 防止标签缩小 */
+            min-width: 100px; /* 设置最小宽度 */
+            text-align: right;
+        }
+
+        input {
+            padding: 8px;
+            font-size: 14px;
+            flex-grow: 1; /* 输入框占据剩余空间 */
+            max-width: 100%; /* 确保输入框不超出父容器 */
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            border-color: #007BFF;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: #007BFF;
+            outline: none;
+        }
+
+        button {
+            padding: 8px 16px;
+            margin-top: 10px;
+            cursor: pointer;
+            border: none;
+            background-color: #007BFF;
+            color: white;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        textarea {
+            width: 100%;
+            height: 300px;
+            padding: 10px;
+            font-size: 14px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            resize: vertical;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        h2 {
+            color: #333;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <a href="mapper代码生成.html">mapper代码生成</a>
+    <a href="service接口代码生成.html">service接口代码生成</a>
+    <a href="service实现代码生成.html">service实现代码生成</a>
+</nav>
+
+<div style="padding: 0 20px 0">
+    <h1>mapper生成</h1>
+
+    <div>
+        <div class="input-container">
+            <label for="package">包名:</label>
+            <input type="text" id="package" value="com.ling">
+        </div>
+        <div class="input-container">
+            <label for="sql">sql:</label>
+            <!-- <input type="textarea" id="sql" placeholder="请输入sql"> -->
+            <textarea rows="500" cols="50" placeholder="请输入sql" id="sql"></textarea>
+        </div>
+
+         <button onclick="sqlParse()">生成代码</button>
+        <button onclick="copyToClipboard()">复制代码</button>
+        <button onclick="downloadResultFile()">下载代码</button>
+    </div>
+
+    <h2>生成的代码:</h2>
+    <textarea id="result" readonly></textarea>
+</div>
+
+
+<script type="text/javascript">
+    const package = document.getElementById("package");
+    const packageName = package.value;	// 包名
+    let tablename = "";
+
+    // 解析sql
+    function parseSQLFields(sql) {
+        // 类型映射规则（保持不变）
+        const TYPE_MAPPING = {
+            varchar: 'str',
+            text: 'str',
+            char: 'str',
+            int: 'int',
+            tinyint: 'int',
+            smallint: 'int',
+            mediumint: 'int',
+            bigint: 'int',
+            date: 'date',
+            datetime: 'date',
+            timestamp: 'date',
+            float: 'float',
+            double: 'float',
+            decimal: 'float',
+            numeric: 'float'
+        };
+        tablename = sql.match(/CREATE\s+TABLE\s+`?(\w+)`?/i)[1];
+        // 提取表结构（增加多行注释处理）
+        const fieldSection = sql.match(/\(([\s\S]+)\)\s*(comment|COLLATE)/i)?.[1] || sql.match(/\(([\s\S]+)\)/)?.[1];
+        if (!fieldSection) return [];
+
+        return fieldSection
+            .split(/,\s*(?=\S)/)
+            .map(line => line.trim().replace(/\s+/g, ' '))
+            .filter(line => {
+                // 增强过滤逻辑
+                return line &&
+                    !line.startsWith('PRIMARY KEY') &&
+                    !line.startsWith('CONSTRAINT') &&
+                    !/^\d+:/.test(line); // 过滤掉以数字开头的行
+            })
+            .map(line => {
+                // 增强注释清洗（支持跨行注释）
+                const cleanedLine = line
+                    .replace(/\scomment\s+'.*?'/gi, '') // 清除单行注释
+                    .replace(/\s+default\s+[\w']+/gi, '') // 清除default值
+                    .replace(/'[^']*'|"[^"]*"/g, ''); // 清除所有引号内容
+
+                // 字段名解析（增加有效性校验）
+                const nameMatch = cleanedLine.match(/^`?([a-zA-Z_]\w*)`?/);
+                if (!nameMatch) return null;
+
+                // 类型解析（增加边界校验）
+                const typeMatch = cleanedLine.match(/^`?\w+`?\s+`?(\w+)`?/);
+                if (!typeMatch) return null;
+
+                return {
+                    name: nameMatch[1],
+                    cameName: toCame(nameMatch[1]),
+                    type: TYPE_MAPPING[typeMatch[1].toLowerCase()] || 'str',
+                    isPkey: cleanedLine.toLowerCase().includes('primary key')
+                };
+            })
+            .filter(Boolean);
+    }
+
+    let fields = [];
+    let pk_n = "";  // 主键字段属性
+    let pk_c = "";  // 主键字段
+
+    // 解析按钮点击触发
+    const sqlParse = () => {
+        let result = _sqlParse();
+        document.getElementById("result").value = result;
+    }
+
+    // 解析sql
+    const _sqlParse = () => {
+        const sql = document.getElementById("sql");
+        const sqlStr = sql.value;
+        fields = parseSQLFields(sqlStr);
+        let replace_1 = createCommonField();
+        let replace_2 = createQueryCondition();
+        let [replace_3, replace_4] = createInsertField();
+        let [replace_5, replace_6, replace_7, replace_8] = createUpdateField();
+        let mapperContent =
+`<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="${packageName}.mappers.${toCame(tablename, true)}Mapper">
+
+    <!-- 通用字段 -->
+    ${replace_1}
+
+    <!-- 查询条件 -->
+    <sql id="queryCondition">
+        ${replace_2}
+    </sql>
+
+    <!-- 条件分页查询，返回po -->
+    <select id="selectByCondition" resultType="${packageName}.entity.po.${toCame(tablename, true)}">
+        select
+        <include refid="commonField"/>
+        from ${tablename}
+        <include refid="queryCondition"/>
+        <if test='orderBy != null and orderBy != ""'>
+            order by \${orderBy}
+        </if>
+        <if test="index != null and size != null">
+            limit #{index}, #{size}
+        </if>
+    </select>
+
+    <!-- 条件查询总数量 -->
+    <select id="countByCondition" resultType="java.lang.Long">
+        select count(0) total from ${tablename} <include refid="queryCondition"/>
+    </select>
+
+    <!-- 查询所有 -->
+    <select id="selectAll" resultType="${packageName}.entity.po.${toCame(tablename, true)}">
+        select <include refid="commonField"/> from ${tablename}
+    </select>
+
+    <!-- 查询总数量 -->
+    <select id="countAll" resultType="java.lang.Long">
+        select count(0) total from ${tablename}
+    </select>
+
+    <!-- 通过id查询 -->
+    <select id="selectById" resultType="${packageName}.entity.po.${toCame(tablename, true)}">
+        select <include refid="commonField"/> from ${tablename} where ${pk_c} = #{${pk_n}}
+    </select>
+
+    <!-- 插入 -->
+    <insert id="insert">
+        insert into ${tablename} values(
+    ${replace_3}
+    </insert>
+
+    <!-- 批量插入 -->
+    <insert id="batchInsert">
+        insert into ${tablename} values
+        <foreach collection="list" item="item" separator=",">
+            ${replace_4}
+        </foreach>
+    </insert>
+
+    <!-- 更新 -->
+    <update id="update">
+        update ${tablename}
+        <set>
+            ${replace_5}
+        </set>
+        where ${replace_7}
+    </update>
+
+    <!-- 批量更新 -->
+    <update id="batchUpdate">
+        <foreach collection="list" item="item" separator=";">
+            update ${tablename}
+            <set>
+                ${replace_6}
+            </set>
+            where ${replace_8}
+        </foreach>
+    </update>
+
+    <!-- 删除/批量删除 -->
+    <delete id="delete">
+        delete from ${tablename} where ${pk_c} in
+        <foreach collection="list" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
+`
+        console.log(mapperContent);
+        return mapperContent;
+    }
+
+    // 驼峰命名
+    const toCame = (name, firstUp) => {
+        const splice = name.split("_");
+        let newName = "";
+        splice.forEach(e => newName += e.charAt(0).toUpperCase() + e.slice(1));
+        return firstUp ? newName : newName.charAt(0).toLowerCase() + newName.slice(1);
+    }
+
+    // 生成通用字段
+    const createCommonField = () => {
+        let commonFields = "";
+        fields.forEach((e, index) => {
+            // 这是xml的缩进
+            commonFields += index === 0 ? `        ${e.name}` : `\n        , ${e.name}`;
+        })
+        // 这也是xml缩进
+        const xmlContent =
+            `<sql id="commonField">
+${commonFields}
+    </sql>`;
+        return xmlContent;
+    }
+
+    // 生成查询条件
+    const createQueryCondition = () => {
+        let ifs = "";
+        fields.forEach(e => {
+            let test = `${e.cameName} != null`;
+            let condition;
+            if (e.type === "str") {
+                test += ` and ${e.cameName} != ''`;
+                condition = `and ${e.name} like concat('%', #{${e.cameName}}, '%')`;
+            } else {
+                condition = `and ${e.name} = #{${e.cameName}}`;
+            }
+            ifs += `            <if test="${test}">\n                ${condition}\n            </if>\n`; // 调整缩进
+        })
+        return `<where>\n${ifs}        </where>`;
+    }
+
+    // 生成插入字段
+    const createInsertField = () => {
+        let fields_1 = "";
+        let fields_2 = "(";
+        const len = fields.length;
+        for (let i = 0; i < len; i++) {
+            let name = fields[i].cameName;
+            fields_1 += i === len - 1 ? `        #{${name}}` : `        #{${name}},\n    `;
+            fields_2 += i === len - 1 ? `#{item.${name}}` : `#{item.${name}},\n            `;
+        }
+        fields_1 += ")";
+        fields_2 += ")";
+        return [fields_1, fields_2];
+    }
+
+    // 生成编辑字段
+    const createUpdateField = () => {
+        let fields_1 = "";
+        let fields_2 = "";
+        const len = fields.length;
+        for (let i = 0; i < len; i++) {
+            let field = fields[i];
+            if (field.isPkey) {
+                pk_n = field.cameName
+                pk_c = field.name
+                continue;
+            }
+            let name = field.cameName;
+            let col = field.name;
+            let test = `${name} != null`;
+            if (field.type === "str") test += ` and ${name} != ''`;
+            let n = i === len - 1 ? "" : "\n            ";
+            fields_1 += `<if test="${test}">${col} = #{${name}},</if>${n}`;
+            fields_2 += `<if test="${test}">${col} = #{item.${name}},</if>${n}    `;
+        }
+        let fields_3 = `${pk_c} = #{${pk_n}}`;
+        let fields_4 = `${pk_c} = #{item.${pk_n}}`;
+        return [fields_1, fields_2, fields_3, fields_4];
+    }
+
+    // 复制
+    function copyToClipboard() {
+        const resultText = document.getElementById("result").value;
+        if (resultText) {
+            navigator.clipboard.writeText(resultText)
+                .then(() => {
+                    alert("代码已复制到剪贴板！");
+                })
+                .catch(err => {
+                    alert("复制失败，错误：" + err);
+                });
+        } else {
+            alert("没有生成代码可复制！");
+        }
+    }
+
+    // 下载
+    const downloadResultFile = () => {
+        const result = _sqlParse();
+        const filename = `${toCame(tablename, true)}Mapper.xml`;
+        const blob = new Blob([result], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+</script>
+</body>
+</html>
