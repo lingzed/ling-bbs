@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ling.mappers.ArticleMapper">
+
+    <!-- 通用字段 -->
+    <sql id="commonField">
+        article_id
+        , board_id
+        , board_name
+        , p_board_id
+        , p_board_name
+        , avatar
+        , user_id
+        , nick_name
+        , user_id_address
+        , title
+        , cover
+        , editor_type
+        , summary
+        , read_count
+        , like_count
+        , comment_count
+        , top_type
+        , attachment_type
+        , status
+        , create_time
+        , update_time
+    </sql>
+
+    <!-- 查询条件 -->
+    <sql id="queryCondition">
+        <where>
+            <if test="title != null and title != ''">
+                title like concat('%', #{title}, '%')
+            </if>
+            <if test="boardId != null">
+                and board_id = #{boardId}
+            </if>
+            <if test="pBoardId != null">
+                and p_board_id = #{pBoardId}
+            </if>
+            <if test="statusControl != null and statusControl == 0">
+                <!-- 管理员仅不能看删除文章 -->
+                and status != 0
+            </if>
+            <if test="statusControl != null and statusControl == 1">
+                <!-- 登录用户能看到所有状态为2和自己的状态为1的文章 -->
+                and (status = 2 or (status = 1 and user_id = #{scUserId}))
+            </if>
+            <if test="statusControl != null and statusControl == 2">
+                <!-- 未登录用户只能看到所有状态为2的文章 -->
+                and status = 2
+            </if>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+            <if test="topType != null">
+                and top_type = #{topType}
+            </if>
+            <if test="createTime != null">
+                and create_time = #{createTime}
+            </if>
+            <if test="startCreateTime != null and endCreateTime != null">
+                and create_time between #{startCreateTime} and #{endCreateTime}
+            </if>
+            <if test="author != null and author != ''">
+                and nick_name like concat('%', #{author}, '%')
+            </if>
+            <if test="attachmentType != null">
+                and attachment_type = #{attachmentType}
+            </if>
+            <if test="userId != null and userId != ''">
+                and user_id = #{userId}
+            </if>
+        </where>
+    </sql>
+
+    <!-- 条件分页查询，返回po -->
+    <select id="selectByCondition" resultType="com.ling.entity.po.Article">
+        select
+        <include refid="commonField"/>
+        from article
+        <include refid="queryCondition"/>
+        <if test='orderBy != null and orderBy != ""'>
+            order by ${orderBy}
+        </if>
+        <if test="index != null and size != null">
+            limit #{index}, #{size}
+        </if>
+    </select>
+
+    <!-- 条件查询总数量 -->
+    <select id="selectCountByCondition" resultType="java.lang.Long">
+        select count(0) total from article
+        <include refid="queryCondition"/>
+    </select>
+
+    <!-- 查询所有 -->
+    <select id="selectAll" resultType="com.ling.entity.po.Article">
+        select
+        <include refid="commonField"/>
+        from article
+    </select>
+
+    <!-- 查询总数量 -->
+    <select id="selectCount" resultType="java.lang.Long">
+        select count(0) total
+        from article
+    </select>
+
+    <!-- 通过id查询 -->
+    <select id="selectById" resultType="com.ling.entity.po.Article">
+        select<include refid="commonField"/>, content, md_content from article where article_id = #{articleId}
+    </select>
+
+    <!-- 通过 userId 查询已审核文章 -->
+    <select id="selectByUserAndStatus" resultType="com.ling.entity.po.Article">
+        select
+        <include refid="commonField"/>
+        from article
+        <where>
+            <if test="userId != null and userId != ''">
+                and user_id = #{userId}
+            </if>
+            <if test="showPadding != null and showPadding">
+                and status in (1, 2)
+            </if>
+            <if test="showPadding != null and !showPadding">
+                and status = 2
+            </if>
+        </where>
+        order by create_time desc
+    </select>
+
+    <!-- 通过 userId 统计已审核数量 -->
+    <select id="countByUserAndAudit" resultType="java.lang.Long">
+        select count(0) total from article where user_id = #{userId} and status = 2
+    </select>
+
+    <!-- 插入 -->
+    <insert id="insert">
+        insert into article values(
+        #{articleId},
+        #{boardId},
+        #{boardName},
+        #{pBoardId},
+        #{pBoardName},
+        #{avatar},
+        #{userId},
+        #{nickName},
+        #{userIdAddress},
+        #{title},
+        #{cover},
+        #{content},
+        #{mdContent},
+        #{editorType},
+        #{summary},
+        #{readCount},
+        #{likeCount},
+        #{commentCount},
+        #{topType},
+        #{attachmentType},
+        #{status},
+        #{createTime},
+        #{updateTime})
+    </insert>
+
+    <!-- 批量插入 -->
+    <insert id="batchInsert">
+        insert into article values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.articleId},
+            #{item.boardId},
+            #{item.boardName},
+            #{item.pBoardId},
+            #{item.pBoardName},
+            #{item.avatar},
+            #{item.userId},
+            #{item.nickName},
+            #{item.userIdAddress},
+            #{item.title},
+            #{item.cover},
+            #{item.content},
+            #{item.mdContent},
+            #{item.editorType},
+            #{item.summary},
+            #{item.readCount},
+            #{item.likeCount},
+            #{item.commentCount},
+            #{item.topType},
+            #{item.attachmentType},
+            #{item.status},
+            #{item.createTime},
+            #{item.updateTime})
+        </foreach>
+    </insert>
+
+    <!-- 更新 -->
+    <update id="update">
+        update article
+        <set>
+            <if test="boardId != null">board_id = #{boardId},</if>
+            <if test="boardName != null and boardName != ''">board_name = #{boardName},</if>
+            <if test="pBoardId != null">p_board_id = #{pBoardId},</if>
+            <if test="pBoardName != null">p_board_name = #{pBoardName},</if>
+            <if test="avatar != null and avatar != ''">avatar = #{avatar},</if>
+            <if test="userId != null and userId != ''">user_id = #{userId},</if>
+            <if test="nickName != null and nickName != ''">nick_name = #{nickName},</if>
+            <if test="userIdAddress != null and userIdAddress != ''">user_id_address = #{userIdAddress},</if>
+            <if test="title != null and title != ''">title = #{title},</if>
+            <if test="cover != null and cover != ''">cover = #{cover},</if>
+            <if test="content != null and content != ''">content = #{content},</if>
+            <if test="mdContent != null and mdContent != ''">md_content = #{mdContent},</if>
+            <if test="editorType != null">editor_type = #{editorType},</if>
+            <if test="summary != null and summary != ''">summary = #{summary},</if>
+            <if test="readCount != null">read_count = #{readCount},</if>
+            <if test="likeCount != null">like_count = #{likeCount},</if>
+            <if test="commentCount != null">comment_count = #{commentCount},</if>
+            <if test="topType != null">top_type = #{topType},</if>
+            <if test="attachmentType != null">attachment_type = #{attachmentType},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </set>
+        where article_id = #{articleId}
+    </update>
+
+    <!-- 批量更新 -->
+    <update id="batchUpdate">
+        <foreach collection="list" item="item" separator=";">
+            update article
+            <set>
+                <if test="item.boardId != null">board_id = #{item.boardId},</if>
+                <if test="item.boardName != null and item.boardName != ''">board_name = #{item.boardName},</if>
+                <if test="item.pBoardId != null">p_board_id = #{item.pBoardId},</if>
+                <if test="item.pBoardName != null">p_board_name = #{item.pBoardName},</if>
+                <if test="item.avatar != null and item.avatar != ''">avatar = #{item.avatar},</if>
+                <if test="item.userId != null and item.userId != ''">user_id = #{item.userId},</if>
+                <if test="item.nickName != null and item.nickName != ''">nick_name = #{item.nickName},</if>
+                <if test="item.userIdAddress != null and item.userIdAddress != ''">user_id_address =
+                    #{item.userIdAddress},
+                </if>
+                <if test="item.title != null and item.title != ''">title = #{item.title},</if>
+                <if test="item.cover != null and item.cover != ''">cover = #{item.cover},</if>
+                <if test="item.content != null and item.content != ''">content = #{item.content},</if>
+                <if test="item.mdContent != null and item.mdContent != ''">md_content = #{item.mdContent},</if>
+                <if test="item.editorType != null">editor_type = #{item.editorType},</if>
+                <if test="item.summary != null and item.summary != ''">summary = #{item.summary},</if>
+                <if test="item.readCount != null">read_count = #{item.readCount},</if>
+                <if test="item.likeCount != null">like_count = #{item.likeCount},</if>
+                <if test="item.commentCount != null">comment_count = #{item.commentCount},</if>
+                <if test="item.topType != null">top_type = #{item.topType},</if>
+                <if test="item.attachmentType != null">attachment_type = #{item.attachmentType},</if>
+                <if test="item.status != null">status = #{item.status},</if>
+                <if test="item.createTime != null">create_time = #{item.createTime},</if>
+                <if test="item.updateTime != null">update_time = #{item.updateTime},</if>
+            </set>
+            where article_id = #{item.articleId}
+        </foreach>
+    </update>
+
+    <!-- 更新附件状态 -->
+    <update id="updateAttachmentType">
+        update article
+        set attachment_type = #{attachmentType}
+        where article_id = #{articleId}
+    </update>
+
+    <!-- 更新阅读量 -->
+    <update id="incrementReadCount">
+        update article
+        set read_count = read_count + 1
+        where article_id = #{articleId}
+    </update>
+
+    <!-- 更新文章点赞量 -->
+    <update id="updateLikeCount">
+        update article
+        set like_count = like_count + #{likeCount}
+        where article_id = #{articleId}
+    </update>
+
+    <!-- 更新评论量 -->
+    <update id="updateCommentCount">
+        update article
+        set comment_count = comment_count + #{commentCount}
+        where article_id = #{articleId}
+    </update>
+
+    <!-- 更新头像 -->
+    <update id="updateAvatar">
+        update article set avatar = #{avatar} where user_id = #{userId}
+    </update>
+
+    <!-- 删除/批量删除 -->
+    <delete id="delete">
+        delete from article where article_id in
+        <foreach collection="list" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
