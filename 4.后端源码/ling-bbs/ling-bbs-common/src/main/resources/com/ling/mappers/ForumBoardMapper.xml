@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ling.mappers.ForumBoardMapper">
+
+    <!-- 通用字段 -->
+    <sql id="commonField">
+        board_id
+        , p_board_id
+        , board_name
+        , cover
+        , description
+        , sort
+        , post_type
+    </sql>
+
+    <!-- 查询条件 -->
+    <sql id="queryCondition">
+        <where>
+            <if test="boardName != null and boardName != ''">
+                board_name like concat('%', #{boardName}, '%')
+            </if>
+            <if test="postType != null">
+                and post_type = #{postType}
+            </if>
+            <if test="pBoardId != null">
+                and p_board_id = #{pBoardId}
+            </if>
+            <if test="boardId != null">
+                and board_id = #{boardId}
+            </if>
+            <if test="boardId != null">
+                and board_id = #{boardId}
+            </if>
+        </where>
+    </sql>
+
+    <!-- 条件分页查询，返回po -->
+    <select id="selectByCondition" resultType="com.ling.entity.po.ForumBoard">
+        select <include refid="commonField"/> from forum_board
+        <include refid="queryCondition" />
+        order by sort
+    </select>
+
+    <!-- 查询所有 -->
+    <select id="selectAll" resultType="com.ling.entity.po.ForumBoard">
+        select <include refid="commonField"/> from forum_board
+    </select>
+
+    <!-- 通过id查询 -->
+    <select id="selectById" resultType="com.ling.entity.po.ForumBoard">
+        select <include refid="commonField"/> from forum_board
+        <where>
+            board_id = #{boardId}
+        </where>
+    </select>
+
+    <!-- 通过Pid和id查询 -->
+    <select id="selectByPidAndId" resultType="com.ling.entity.po.ForumBoard">
+        select <include refid="commonField" /> from forum_board
+        where p_board_id = #{pid} and board_id = #{id}
+    </select>
+
+    <!-- 插入 -->
+    <insert id="insert">
+        insert into forum_board(<include refid="commonField"/>) values(
+        null,
+        #{pBoardId},
+        #{boardName},
+        #{cover},
+        #{description},
+        #{sort},
+        #{postType})
+    </insert>
+
+    <!-- 批量插入 -->
+    <insert id="batchInsert">
+        insert into forum_board(<include refid="commonField"/>) values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.boardId},
+            #{item.pBoardId},
+            #{item.boardName},
+            #{item.cover},
+            #{item.description},
+            #{item.sort},
+            #{item.postType})
+        </foreach>
+    </insert>
+
+    <!-- 更新 -->
+    <update id="update">
+        update forum_board
+        <set>
+            <!-- <if test="pBoardId != null">p_board_id = #{pBoardId},</if> -->
+            <if test="boardName != null and boardName != ''">board_name = #{boardName},</if>
+            <if test="cover != null and cover != ''">cover = #{cover},</if>
+            <if test="description != null and description != ''">description = #{description},</if>
+            <if test="sort != null">sort = #{sort},</if>
+            <if test="postType != null">post_type = #{postType},</if>
+        </set>
+        <where>
+            board_id = #{boardId}
+        </where>
+    </update>
+
+    <!-- 批量更新 -->
+    <update id="batchUpdate">
+        <foreach collection="list" item="item" separator=";">
+            update forum_board
+            <set>
+                <if test="item.pBoardId != null">p_board_id = #{item.pBoardId},</if>
+                <if test="item.boardName != null and item.boardName != ''">board_name = #{item.boardName},</if>
+                <if test="item.cover != null and item.cover != ''">cover = #{item.cover},</if>
+                <if test="item.description != null and item.description != ''">description = #{item.description},</if>
+                <if test="item.sort != null">sort = #{item.sort},</if>
+                <if test="item.postType != null">post_type = #{item.postType},</if>
+            </set>
+            <where>
+                board_id = #{item.boardId}
+            </where>
+        </foreach>
+    </update>
+
+    <!-- 删除/批量删除 -->
+    <delete id="delete">
+        delete from forum_board where board_id in
+        <foreach collection="list" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="deleteBoard">
+        delete from forum_board where board_id = #{bId}
+        <if test="isParent != null and isParent">
+            or p_board_id = #{bId}
+        </if>
+    </delete>
+</mapper>
